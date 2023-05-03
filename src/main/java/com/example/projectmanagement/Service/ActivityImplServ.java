@@ -19,13 +19,11 @@ public class ActivityImplServ implements ActitvtyServ{
 
     private final TeamRepository teamRepository;
 
-    private final TaskRepository taskRepository;
 
     public ActivityImplServ(ActivityRepository activityRepository, ProjectRepository projectRepository, TeamRepository teamRepository, TaskRepository taskRepository) {
         this.activityRepository = activityRepository;
         this.projectRepository = projectRepository;
         this.teamRepository = teamRepository;
-        this.taskRepository = taskRepository;
     }
 
 
