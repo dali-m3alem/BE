@@ -61,6 +61,7 @@ public class User implements Serializable,UserDetails{
             inverseJoinColumns = @JoinColumn(name = "auth_id"))
     private Set<Authorisation> roles = new HashSet<>();
 
+
     @PrePersist
     protected void onCreate() {
         dateDeCreation = LocalDateTime.now();
@@ -77,6 +78,7 @@ public class User implements Serializable,UserDetails{
     public boolean hasProjectManagerRole() {
         return this.roles.stream().anyMatch(authorisation -> authorisation.getRoleName().equals("manager"));
     }
+
 
 
     @Override

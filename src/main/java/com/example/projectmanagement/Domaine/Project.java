@@ -38,7 +38,7 @@ public class Project implements Serializable {
     @JoinColumn(name = "admin_id")
     private User admin;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_leader_id")
     private User projectManager;
     @JsonIgnore

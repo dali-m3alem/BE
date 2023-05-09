@@ -21,7 +21,7 @@ import java.util.Date;
 @Table(name = "_task")
 public class Task  implements Serializable{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "task_seq")
     private Long id ;
     private String Title;
     private String CreatedBy;

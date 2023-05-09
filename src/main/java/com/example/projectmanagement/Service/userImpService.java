@@ -5,9 +5,11 @@ import com.example.projectmanagement.DTO.RequestRegister;
 import com.example.projectmanagement.DTO.ResponseAuth;
 import com.example.projectmanagement.Domaine.Authorisation;
 import com.example.projectmanagement.Domaine.Task;
+import com.example.projectmanagement.Domaine.Team;
 import com.example.projectmanagement.Domaine.User;
 import com.example.projectmanagement.Reposirtory.AuthRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
+import com.example.projectmanagement.Reposirtory.TeamRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.mail.MessagingException;
@@ -48,6 +50,8 @@ public class userImpService implements UserSer{
     private EntityManagerFactory entityManagerFactory;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private TeamRepository teamRepository;
 
 
 
@@ -214,18 +218,26 @@ public class userImpService implements UserSer{
         System.out.println(user);
         return repository.save(user);
     }
-
+    @Transactional
     public void deleteUser(Long id) {
         User user = repository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        // Supprimer la référence de l'utilisateur dans chaque entité Task
+        // Remove the user from any tasks they are assigned to
         List<Task> userTasks = taskRepository.findByUser(user);
         for (Task task : userTasks) {
             task.setUser(null);
             taskRepository.save(task);
         }
 
-        // Supprimer l'entité User
+        // Remove the user from any teams they belong to
+        List<Team> teams = teamRepository.findByMembersContaining(user);
+        for (Team team : teams) {
+            team.removeMember(user);
+            teamRepository.save(team);
+        }
+
+
+        // Delete the user from the database
         repository.delete(user);
     }
 

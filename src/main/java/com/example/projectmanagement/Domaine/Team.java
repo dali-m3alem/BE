@@ -21,8 +21,8 @@ import java.util.Set;
 @Table(name = "_Team")
 public class Team implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "task_seq")
-    @SequenceGenerator(name = "task_seq",sequenceName = "task_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "team_seq")
+    @SequenceGenerator(name = "team_seq",sequenceName = "team_seq")
     private Long TeamId;
     @Column(name = "team_name")
     private String TeamName;
@@ -38,10 +38,19 @@ public class Team implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> members = new HashSet<>();
 
+
     public void setMembers(List<User> members) {
         this.members = new HashSet<>(members);
     }
 
-
+    public void removeMember(User user) {
+        members.remove(user);
+    }
 
 }
+
+
+
+
+
+
