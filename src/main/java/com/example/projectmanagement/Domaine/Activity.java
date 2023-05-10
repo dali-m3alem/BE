@@ -31,10 +31,11 @@ public class Activity implements Serializable {
 
     @ManyToOne
     private Project project;
-    @OneToMany(mappedBy = "activity", fetch = FetchType.LAZY)
-    private Set<Task> tasks;
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Task> task = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "team_id")
     private Team team;
 

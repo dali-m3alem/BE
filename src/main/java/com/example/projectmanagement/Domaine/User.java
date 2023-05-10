@@ -61,6 +61,7 @@ public class User implements Serializable,UserDetails{
             inverseJoinColumns = @JoinColumn(name = "auth_id"))
     private Set<Authorisation> roles = new HashSet<>();
 
+
     @PrePersist
     protected void onCreate() {
         dateDeCreation = LocalDateTime.now();
@@ -86,7 +87,7 @@ public class User implements Serializable,UserDetails{
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

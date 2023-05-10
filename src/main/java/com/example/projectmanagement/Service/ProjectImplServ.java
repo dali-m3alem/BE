@@ -1,15 +1,11 @@
 package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.*;
+import com.example.projectmanagement.Domaine.*;
+import com.example.projectmanagement.Reposirtory.*;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.example.projectmanagement.Domaine.Activity;
-import com.example.projectmanagement.Domaine.Project;
-import com.example.projectmanagement.Domaine.Team;
-import com.example.projectmanagement.Domaine.User;
-import com.example.projectmanagement.Reposirtory.ProjectRepository;
-import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -17,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +27,12 @@ public class ProjectImplServ implements ProjectServ{
     private UserRepository userRepository;
     @Autowired
     private EntityManagerFactory entityManagerFactory;
+    @Autowired
+    private  ActivityRepository activityRepository;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private TeamRepository teamRepository;
 
 
     public List<Project> getAllProjects() {
@@ -161,7 +161,47 @@ public class ProjectImplServ implements ProjectServ{
         return projectRepository.save(project);
     }
 
-    public void deleteProject(Long id) {
-        projectRepository.deleteById(id);
+
+
+
+    @Transactional
+    public void deleteProject(Long projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found"));
+
+        // Supprimer les activités liées
+        List<Activity> activities = project.getActivities();
+        for (Activity activity : activities) {
+            deleteActivity(activity);
+        }
+
+        // Supprimer le projet lui-même
+        projectRepository.delete(project);
     }
+    @Transactional
+    private void deleteActivity(Activity activity) {
+        // Supprimer les tâches liées
+        Set<Task> tasks = new HashSet<>(activity.getTask()); // Copie des tâches pour éviter ConcurrentModificationException
+        for (Task task : tasks) {
+            deleteTask(task);
+        }
+
+        // Supprimer l'activité elle-même
+        activity.getTask().clear(); // Dissocier les tâches de l'activité
+        activity.setTeam(null);
+        activityRepository.delete(activity);
+    }
+
+    private void deleteTask(Task task) {
+        // Supprimer la tâche elle-même
+        taskRepository.delete(task);
+    }
+
 }
+
+
+
+
+
+
+

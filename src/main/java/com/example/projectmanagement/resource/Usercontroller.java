@@ -94,8 +94,11 @@ public class Usercontroller {
             return ResponseEntity.badRequest().body("User not found");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("An error occurred during the update process");
         }
     }
+
     @GetMapping("/countUser")
     public ResponseEntity<Long> countUser() {
         Long count = service.countUsers();
@@ -167,7 +170,11 @@ public class Usercontroller {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/managers")
+    public List<String> getUsersWithManagerRole() {
+        return service.getUsersWithManagerRole();
 
+    }
 
 }
 

@@ -9,7 +9,7 @@ import java.util.List;
 public interface ActitvtyServ {
 
     public List<Activity> getAllActivity();
-    public List<Activity> getActivityByProjectId(Long id);
+    public List<Activity> getActivityByProjectId(Long id, Long ManagerId) throws Exception;
     public Activity updateActivity(ActivityDto activityDto);
     public void deleteActivity(Long id);
     public Activity createActivity(ActivityDto activityDto);

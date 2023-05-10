@@ -32,8 +32,12 @@ public class ActivityImplServ implements ActitvtyServ{
         return activityRepository.findAll();
     }
 
-    public List<Activity> getActivityByProjectId(Long id) {
-        return activityRepository.findByProjectId(id);
+    public List<Activity> getActivityByProjectId(Long id, Long managerId) throws Exception {
+        List<Activity> activities =  activityRepository.getActivityDetails(id, managerId);
+        if(activities == null){
+            throw new Exception("No activities found");
+        }
+        return activities;
     }
 
     public Activity getActivityById(Long id) {

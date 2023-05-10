@@ -126,7 +126,7 @@ public class TaskImplServ implements TaskServ{
 
 
 
-    @Transactional()
+ /*   @Transactional()
     public List<Task> getAllTasksWithUserAndActivity() {
         List<Task> tasks = taskRepository.findAll();
         for (Task task : tasks) {
@@ -140,7 +140,7 @@ public class TaskImplServ implements TaskServ{
             }
         }
         return tasks;
-    }
+    }*/
 
 
 

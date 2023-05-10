@@ -27,9 +27,9 @@ public class Team implements Serializable {
     @Column(name = "team_name")
     private String TeamName;
     private String TeamDesc;
-    @OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
-    @Column(name = "_activities")
+    @OneToMany(mappedBy = "team", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private Set<Activity> activities = new HashSet<>();
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -38,10 +38,13 @@ public class Team implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> members = new HashSet<>();
 
+
     public void setMembers(List<User> members) {
         this.members = new HashSet<>(members);
     }
 
-
+    public void removeMember(User user) {
+        members.remove(user);
+    }
 
 }
