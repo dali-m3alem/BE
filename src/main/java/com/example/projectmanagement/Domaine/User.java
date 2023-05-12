@@ -78,8 +78,8 @@ public class User implements Serializable,UserDetails{
     public boolean hasProjectManagerRole() {
         return this.roles.stream().anyMatch(authorisation -> authorisation.getRoleName().equals("manager"));
     }
-
-
+    @OneToMany(mappedBy = "sentTo",fetch = FetchType.EAGER)
+    private List<Notification> notifications;
 
     @Override
     public String getPassword() {

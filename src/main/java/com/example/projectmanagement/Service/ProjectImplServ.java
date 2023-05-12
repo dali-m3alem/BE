@@ -1,13 +1,13 @@
 package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.*;
+import com.example.projectmanagement.Domaine.*;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.example.projectmanagement.Domaine.Activity;
-import com.example.projectmanagement.Domaine.Project;
-import com.example.projectmanagement.Domaine.Team;
-import com.example.projectmanagement.Domaine.User;
 import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -17,22 +17,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
+
+
+
 @Service
 @RequiredArgsConstructor
 public class ProjectImplServ implements ProjectServ{
-    @Autowired
-    private EntityManager entityManager;
-   @Autowired
-    private  ProjectRepository projectRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
+    private final EntityManager entityManager;
+
+    private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final EntityManagerFactory entityManagerFactory;
+    private final NotificationHandler notificationHandler;
+
+
 
 
     public List<Project> getAllProjects() {
@@ -105,7 +109,7 @@ public class ProjectImplServ implements ProjectServ{
         return Optional.empty();
     }
 
-
+    @Override
     public Project createProject(ProjectRequest projectRequest) {
         String email = projectRequest.getEmail();
         User user = userRepository.findByEmail(email)
@@ -114,22 +118,36 @@ public class ProjectImplServ implements ProjectServ{
         if (!user.hasProjectManagerRole()) {
             throw new AccessDeniedException("User does not have project manager role");
         }
-        Long userId=projectRequest.getUserId();
-        User user1=userRepository.findById(userId) .orElseThrow(() -> new EntityNotFoundException("User not found : " + userId));
+
+        Long userId = projectRequest.getUserId();
+        User user1 = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found : " + userId));
+
         Project project = new Project();
         project.setProjectName(projectRequest.getProjectName());
         project.setDescriptionP(projectRequest.getDescriptionP());
         project.setObjectiveP(projectRequest.getObjectiveP());
         project.setDurationP(projectRequest.getDurationP());
         project.setProjectManager(user);
-        project.setStatus("not started" );
+        project.setStatus("not started");
         project.setBudget(projectRequest.getBudget());
         project.setDeadlineP(projectRequest.getDeadlineP());
         project.setAdmin(user1);
 
-        return projectRepository.save(project);
+        project = projectRepository.save(project);
 
+        try {
+            Notification notification = notificationHandler.createNotification("A new project has been created", user);
+            notificationHandler.sendNotification(notification);
+            logger.info("Notification sent for project: {}", project.getProjectName());
+
+        } catch (IOException e) {
+            // Handle the exception
+        }
+
+        return project;
     }
+
 
     public void addProjectWithActivities(ProjectAndActivitiesDto projectAndActivitiesDto) {
         ProjectDto projectDto = projectAndActivitiesDto.getProjectDto();
@@ -164,4 +182,6 @@ public class ProjectImplServ implements ProjectServ{
     public void deleteProject(Long id) {
         projectRepository.deleteById(id);
     }
+
+    private static final Logger logger = LoggerFactory.getLogger(Project.class);
 }

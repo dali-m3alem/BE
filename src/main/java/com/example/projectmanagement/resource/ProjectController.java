@@ -61,9 +61,11 @@ public class ProjectController {
     }
 
     @PostMapping("/createProject")
-    public Project createProject(@RequestBody ProjectRequest projectRequest) {
-        return projectService.createProject(projectRequest);
+    public ResponseEntity<Project> createProject(@RequestBody ProjectRequest projectRequest) {
+        Project Project = projectService.createProject(projectRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Project);
     }
+
 
 
     @PutMapping("/updateProject")
