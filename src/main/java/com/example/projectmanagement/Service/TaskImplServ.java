@@ -69,7 +69,7 @@ public class TaskImplServ implements TaskServ{
         try {
             Notification notification = notificationHandler.createNotification("A new task has been created to you", user);
             notificationHandler.sendNotification(notification);
-            logger.info("Notification sent for project: {}", task.getTitle());
+            logger.info("Notification sent for task: {}", task.getTitle());
 
         } catch (IOException e) {
             // Handle the exception
@@ -98,10 +98,23 @@ public class TaskImplServ implements TaskServ{
             updatedTask.setUser(user);
             updatedTask.setActivity(activity);
 
-            return taskRepository.save(updatedTask);
+            updatedTask= taskRepository.save(updatedTask);
+
+            try {
+                Notification notification = notificationHandler.createNotification("A task has been updated to you", user);
+                notificationHandler.sendNotification(notification);
+                logger.info("Notification sent for task: {}", updatedTask.getTitle());
+
+            } catch (IOException e) {
+                // Handle the exception
+            }
+
+            return updatedTask;
+
         } else {
             throw new NotFoundException("Task not found with id: " + id);
         }
+
     }
 
     public class NotFoundException extends RuntimeException {
@@ -111,9 +124,18 @@ public class TaskImplServ implements TaskServ{
     }
 
 
-
     public void deleteTask(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("task not found with id: " + id));
+        User user = task.getUser();
         taskRepository.deleteById(id);
+
+        try {
+            Notification notification = notificationHandler.createNotification("Task has been deleted", user);
+            notificationHandler.sendNotification(notification);
+            logger.info("Notification sent for task deletion: {}", task.getTitle());
+        } catch (IOException e) {
+        }
     }
 
     public List<Task> getAllTasks() {
