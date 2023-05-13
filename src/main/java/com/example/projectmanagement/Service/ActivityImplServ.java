@@ -7,24 +7,19 @@ import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.TeamRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ActivityImplServ implements ActitvtyServ{
     private final ActivityRepository activityRepository;
 
     private final ProjectRepository projectRepository;
 
     private final TeamRepository teamRepository;
-
-
-    public ActivityImplServ(ActivityRepository activityRepository, ProjectRepository projectRepository, TeamRepository teamRepository, TaskRepository taskRepository) {
-        this.activityRepository = activityRepository;
-        this.projectRepository = projectRepository;
-        this.teamRepository = teamRepository;
-    }
 
 
     @Override
@@ -78,7 +73,7 @@ public class ActivityImplServ implements ActitvtyServ{
         activity.setProject(project);
 
         Team team = new Team();
-        team.setTeamId(activityDto.getTeamId());
+        team.setId(activityDto.getTeamId());
         activity.setTeam(team);
 
         return activityRepository.save(activity);

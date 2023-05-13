@@ -14,5 +14,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     @Override
     Optional<Activity> findById(Long Long);
+    List<Activity> findByTeamId(Long TeamId);
+
 
 }

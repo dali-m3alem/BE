@@ -23,10 +23,10 @@ public class Team implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "team_seq")
     @SequenceGenerator(name = "team_seq",sequenceName = "team_seq")
-    private Long TeamId;
+    private Long id;
     @Column(name = "team_name")
-    private String TeamName;
-    private String TeamDesc;
+    private String teamName;
+    private String teamDesc;
     @OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
     @Column(name = "_activities")
     private Set<Activity> activities = new HashSet<>();

@@ -3,14 +3,8 @@ package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.RequestAuth;
 import com.example.projectmanagement.DTO.RequestRegister;
 import com.example.projectmanagement.DTO.ResponseAuth;
-import com.example.projectmanagement.Domaine.Authorisation;
-import com.example.projectmanagement.Domaine.Task;
-import com.example.projectmanagement.Domaine.Team;
-import com.example.projectmanagement.Domaine.User;
-import com.example.projectmanagement.Reposirtory.AuthRepository;
-import com.example.projectmanagement.Reposirtory.TaskRepository;
-import com.example.projectmanagement.Reposirtory.TeamRepository;
-import com.example.projectmanagement.Reposirtory.UserRepository;
+import com.example.projectmanagement.Domaine.*;
+import com.example.projectmanagement.Reposirtory.*;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
@@ -35,12 +29,12 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class userImpService implements UserSer{
-    @Autowired
+
     private final UserRepository repository;
-    @Autowired
     private final JwtService serviceJWT;
-    @Autowired
     private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final NotificationRepository notificationRepository;
     @Autowired
     private AuthRepository repositoryAu;
     @Autowired
@@ -227,6 +221,18 @@ public class userImpService implements UserSer{
         for (Task task : userTasks) {
             task.setUser(null);
             taskRepository.save(task);
+        }
+        // Remove the admin from any project they are assigned to
+        List<Project> adminProject= projectRepository.findByAdmin(user);
+        for (Project project: adminProject){
+            project.setAdmin(null);
+            projectRepository.save(project);
+        }
+        // Remove the manager from any project they are assigned to
+        List<Project> managerProject= projectRepository.findByProjectManager(user);
+        for (Project project: managerProject){
+            project.setProjectManager(null);
+            projectRepository.save(project);
         }
 
         // Remove the user from any teams they belong to

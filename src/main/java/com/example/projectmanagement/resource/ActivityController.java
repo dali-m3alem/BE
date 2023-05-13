@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -22,7 +23,6 @@ public class ActivityController {
         public List<Activity> getActivityByProjectId(@PathVariable Long id) {
         return activityService.getActivityByProjectId(id);
     }
-
     @GetMapping("/projects/{projectId}/activityManagerId")
     public ResponseEntity<Long> getActivityManagerId(@PathVariable Long projectId) {
         Long activityManagerId = activityService.getActivityManagerId(projectId);

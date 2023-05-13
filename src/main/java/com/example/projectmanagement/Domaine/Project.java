@@ -34,7 +34,7 @@ public class Project implements Serializable {
     private Long budget;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "admin_id")
     private User admin;
 

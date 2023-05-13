@@ -2,9 +2,11 @@ package com.example.projectmanagement.Service;
 
 import com.example.projectmanagement.DTO.TaskDto;
 import com.example.projectmanagement.DTO.TeamDTO;
+import com.example.projectmanagement.Domaine.Activity;
 import com.example.projectmanagement.Domaine.Project;
 import com.example.projectmanagement.Domaine.Team;
 import com.example.projectmanagement.Domaine.User;
+import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.TeamRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,6 +22,7 @@ public class TeamImplServ implements TeamServ{
     private TeamRepository teamRepository;
     @Autowired
     private UserRepository userRepository;
+    private final ActivityRepository activityRepository;
 
     public List<Team> getAllTeam() {
         return teamRepository.findAll();
@@ -56,11 +59,16 @@ public class TeamImplServ implements TeamServ{
         teamToUpdate.setMembers(users);
         return teamRepository.save(teamToUpdate);
     }
+
+    //know we can delete team and st the activity team id null
     public void deleteTeam(Long idTeam) {
-        // TODO Auto-generated method stub
+        Team team = teamRepository.findById(idTeam).orElseThrow(EntityNotFoundException::new);
 
-        teamRepository.deleteById(idTeam);
-
+        for (Activity activity : activityRepository.findByTeamId(idTeam)) {
+            activity.setTeam(null);
+            activityRepository.save(activity);
+        }
+        teamRepository.delete(team);
     }
 
 

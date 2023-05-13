@@ -50,8 +50,7 @@ public class ProjectImplServ implements ProjectServ{
     public List<ProjectDto> getAllProjectsByManagerId(Long managerId) {
         User manager = userRepository.findById(managerId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
-        List<Project> projects = projectRepository.findByProjectManager(manager)
-                .orElseThrow(() -> new EntityNotFoundException("Projects not found"));
+        List<Project> projects = projectRepository.findByProjectManager(manager);
         return projects.stream().map(project -> {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(project.getId());
@@ -71,8 +70,7 @@ public class ProjectImplServ implements ProjectServ{
     public List<ProjectDto> getAllProjectsByAdminId(Long adminId) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
-        List<Project> projects = projectRepository.findByAdmin(admin)
-                .orElseThrow(() -> new EntityNotFoundException("Projects not found"));
+        List<Project> projects = projectRepository.findByAdmin(admin);
         return projects.stream().map(project -> {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(project.getId());
@@ -168,20 +166,52 @@ public class ProjectImplServ implements ProjectServ{
         Long userId=projectRequest.getUserId();
         User user1=userRepository.findById(userId) .orElseThrow(() -> new EntityNotFoundException("User not found : " + userId));
         Project project = projectRepository.findById(projectRequest.getId()).orElseThrow(EntityNotFoundException::new);
+
         project.setProjectName(projectRequest.getProjectName());
         project.setProjectManager(user);
-       project.setAdmin(user1);
-       project.setDeadlineP(projectRequest.getDeadlineP());
-       project.setObjectiveP(projectRequest.getObjectiveP());
-       project.setDescriptionP(projectRequest.getDescriptionP());
-       project.setDurationP(projectRequest.getDurationP());
-       project.setBudget(projectRequest.getBudget());
-        return projectRepository.save(project);
+        project.setAdmin(user1);
+        project.setDeadlineP(projectRequest.getDeadlineP());
+        project.setObjectiveP(projectRequest.getObjectiveP());
+        project.setDescriptionP(projectRequest.getDescriptionP());
+
+        project.setBudget(projectRequest.getBudget());
+        project= projectRepository.save(project);
+
+        try {
+            Notification notification = notificationHandler.createNotification("Project has been updated", user);
+            notificationHandler.sendNotification(notification);
+            logger.info("Notification sent for project: {}", project.getProjectName());
+
+        } catch (IOException e) {
+            // Handle the exception
+        }
+
+        return project;
     }
 
+
+
     public void deleteProject(Long id) {
+        // Retrieve the project to be deleted
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + id));
+
+        // Get the project manager's information
+        User projectManager = project.getProjectManager();
+
+        // Delete the project
         projectRepository.deleteById(id);
+
+        // Send a notification to the project manager
+        try {
+            Notification notification = notificationHandler.createNotification("Project has been deleted", projectManager);
+            notificationHandler.sendNotification(notification);
+            logger.info("Notification sent for project deletion: {}", project.getProjectName());
+        } catch (IOException e) {
+            // Handle the exception
+        }
     }
+
 
     private static final Logger logger = LoggerFactory.getLogger(Project.class);
 }

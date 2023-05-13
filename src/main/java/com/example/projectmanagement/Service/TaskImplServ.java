@@ -1,21 +1,20 @@
 package com.example.projectmanagement.Service;
 
-import com.example.projectmanagement.DTO.ActivityDto;
 import com.example.projectmanagement.DTO.TaskDto;
-import com.example.projectmanagement.DTO.UserDto;
-import com.example.projectmanagement.Domaine.Activity;
-import com.example.projectmanagement.Domaine.Task;
-import com.example.projectmanagement.Domaine.User;
+import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
-import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,12 +24,11 @@ public class TaskImplServ implements TaskServ{
 
 
 
-    @Autowired
-    private TaskRepository taskRepository;
-    @Autowired
-    private UserRepository Repository;
-    @Autowired
-    private ActivityRepository activityRepository;
+
+    private final TaskRepository taskRepository;
+    private final UserRepository Repository;
+    private final ActivityRepository activityRepository;
+    private final NotificationHandler notificationHandler;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -48,17 +46,17 @@ public class TaskImplServ implements TaskServ{
         return typedQuery.getResultList();
     }
 
-
+    //we add notification each time we create task for user
     public Task createTask(TaskDto taskDto) {
         String email = taskDto.getEmail();
         User user = Repository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        Activity activity= activityRepository.findById(taskDto.getActivity()).orElseThrow(()
+        Activity activity = activityRepository.findById(taskDto.getActivity()).orElseThrow(()
                 -> new IllegalArgumentException("Invalid activity id"));
         Long manager = taskDto.getManager();
         User id = Repository.findById(manager)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        Task task=new Task();
+        Task task = new Task();
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
         task.setCreatedBy(taskDto.getCreatedBy());
@@ -67,7 +65,17 @@ public class TaskImplServ implements TaskServ{
         task.setActivity(activity);
         task.setStatus("todo");
         task.setManager(id);
-        return taskRepository.save(task);
+        task = taskRepository.save(task);
+        try {
+            Notification notification = notificationHandler.createNotification("A new task has been created to you", user);
+            notificationHandler.sendNotification(notification);
+            logger.info("Notification sent for project: {}", task.getTitle());
+
+        } catch (IOException e) {
+            // Handle the exception
+        }
+
+        return task;
     }
 
 
@@ -142,6 +150,7 @@ public class TaskImplServ implements TaskServ{
         return tasks;
     }*/
 
+    private static final Logger logger = LoggerFactory.getLogger(Project.class);
 
 
 }

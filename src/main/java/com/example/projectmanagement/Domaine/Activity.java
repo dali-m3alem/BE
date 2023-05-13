@@ -35,7 +35,7 @@ public class Activity implements Serializable {
     @JsonIgnore
     private List<Task> task = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_id")
     private Team team;
 

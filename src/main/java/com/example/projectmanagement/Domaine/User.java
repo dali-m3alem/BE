@@ -78,7 +78,8 @@ public class User implements Serializable,UserDetails{
     public boolean hasProjectManagerRole() {
         return this.roles.stream().anyMatch(authorisation -> authorisation.getRoleName().equals("manager"));
     }
-    @OneToMany(mappedBy = "sentTo",fetch = FetchType.EAGER)
+    //all notifications deleted with user
+    @OneToMany(mappedBy = "sentTo",fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
 
     @Override

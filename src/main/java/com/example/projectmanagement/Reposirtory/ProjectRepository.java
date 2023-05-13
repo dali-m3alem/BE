@@ -15,8 +15,8 @@ import java.util.Optional;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Override
     Optional<Project> findById(Long Long);
-    Optional<List<Project>> findByAdmin(User adminId);
-    Optional<List<Project>> findByProjectManager(User managerId);
+    List<Project> findByAdmin(User adminId);
+    List<Project> findByProjectManager(User managerId);
     @Query("SELECT p.projectManager FROM Project p WHERE p.id = :projectId")
     Long findActivityManagerIdByProjectId(@Param("projectId") Long projectId);
 
