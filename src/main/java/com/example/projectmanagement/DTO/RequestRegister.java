@@ -14,8 +14,8 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class RequestRegister {
     private String password;
-    private String username;
-    private String userLastName;
+    private String firstName;
+    private String lastName;
     private String email;
     private Long phoneNumber;
     private String RoleName;

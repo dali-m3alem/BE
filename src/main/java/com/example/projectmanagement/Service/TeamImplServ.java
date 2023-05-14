@@ -2,10 +2,7 @@ package com.example.projectmanagement.Service;
 
 import com.example.projectmanagement.DTO.TaskDto;
 import com.example.projectmanagement.DTO.TeamDTO;
-import com.example.projectmanagement.Domaine.Activity;
-import com.example.projectmanagement.Domaine.Project;
-import com.example.projectmanagement.Domaine.Team;
-import com.example.projectmanagement.Domaine.User;
+import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.TeamRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
@@ -14,14 +11,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TeamImplServ implements TeamServ{
-    @Autowired
-    private TeamRepository teamRepository;
-    @Autowired
-    private UserRepository userRepository;
+
+    private final TeamRepository teamRepository;
+    private final UserRepository userRepository;
     private final ActivityRepository activityRepository;
 
     public List<Team> getAllTeam() {
@@ -41,8 +38,8 @@ public class TeamImplServ implements TeamServ{
         team.setTeamDesc(teamRequest.getTeamDesc());
         team.setMembers(users);
 
-
         return teamRepository.save(team);
+
     }
 
 
@@ -53,7 +50,8 @@ public class TeamImplServ implements TeamServ{
         if (users.isEmpty()) {
             throw new EntityNotFoundException("No users found with given emails.");
         }
-        Team teamToUpdate = teamRepository.findById(teamRequest.getTeamId()).get();
+        Team teamToUpdate = teamRepository
+                .findById(teamRequest.getTeamId()).get();
         teamToUpdate.setTeamName(teamRequest.getTeamName());
         teamToUpdate.setTeamDesc(teamRequest.getTeamDesc());
         teamToUpdate.setMembers(users);
@@ -62,7 +60,8 @@ public class TeamImplServ implements TeamServ{
 
     //know we can delete team and st the activity team id null
     public void deleteTeam(Long idTeam) {
-        Team team = teamRepository.findById(idTeam).orElseThrow(EntityNotFoundException::new);
+        Team team = teamRepository.findById(idTeam)
+                .orElseThrow(EntityNotFoundException::new);
 
         for (Activity activity : activityRepository.findByTeamId(idTeam)) {
             activity.setTeam(null);
@@ -73,7 +72,8 @@ public class TeamImplServ implements TeamServ{
 
 
     public Team findById(Long id) {
-        return teamRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        return teamRepository.findById(id).orElseThrow(()
+                -> new EntityNotFoundException("Project not found"));
     }
 
 }

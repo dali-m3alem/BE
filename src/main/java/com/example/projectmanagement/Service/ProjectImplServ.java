@@ -5,16 +5,13 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -110,16 +107,16 @@ public class ProjectImplServ implements ProjectServ{
     @Override
     public Project createProject(ProjectRequest projectRequest) {
         String email = projectRequest.getEmail();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+        User user = userRepository.findByEmail(email).orElseThrow(()
+                -> new EntityNotFoundException("User not found with email: " + email));
 
         if (!user.hasProjectManagerRole()) {
             throw new AccessDeniedException("User does not have project manager role");
         }
 
         Long userId = projectRequest.getUserId();
-        User user1 = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found : " + userId));
+        User user1 = userRepository.findById(userId).orElseThrow(()
+                -> new EntityNotFoundException("User not found : " + userId));
 
         Project project = new Project();
         project.setProjectName(projectRequest.getProjectName());
@@ -135,14 +132,14 @@ public class ProjectImplServ implements ProjectServ{
         project = projectRepository.save(project);
 
         try {
-            Notification notification = notificationHandler.createNotification("A new project has been created", user);
+            Notification notification = notificationHandler
+                    .createNotification("A new project has been created. Please submit your planning as soon as possible.", user);
             notificationHandler.sendNotification(notification);
             logger.info("Notification sent for project: {}", project.getProjectName());
 
         } catch (IOException e) {
             // Handle the exception
         }
-
         return project;
     }
 
@@ -164,8 +161,12 @@ public class ProjectImplServ implements ProjectServ{
             throw new AccessDeniedException("User does not have project manager role");
         }
         Long userId=projectRequest.getUserId();
-        User user1=userRepository.findById(userId) .orElseThrow(() -> new EntityNotFoundException("User not found : " + userId));
-        Project project = projectRepository.findById(projectRequest.getId()).orElseThrow(EntityNotFoundException::new);
+        User user1=userRepository.findById(userId) .
+                orElseThrow(()
+                        -> new EntityNotFoundException("User not found : " + userId));
+        Project project = projectRepository
+                .findById(projectRequest.getId())
+                .orElseThrow(EntityNotFoundException::new);
 
         project.setProjectName(projectRequest.getProjectName());
         project.setProjectManager(user);
@@ -178,7 +179,8 @@ public class ProjectImplServ implements ProjectServ{
         project= projectRepository.save(project);
 
         try {
-            Notification notification = notificationHandler.createNotification("Project has been updated", user);
+            Notification notification = notificationHandler
+                    .createNotification("Project has been updated", user);
             notificationHandler.sendNotification(notification);
             logger.info("Notification sent for project: {}", project.getProjectName());
 
@@ -188,7 +190,6 @@ public class ProjectImplServ implements ProjectServ{
 
         return project;
     }
-
 
 
     public void deleteProject(Long id) {
@@ -204,7 +205,8 @@ public class ProjectImplServ implements ProjectServ{
 
         // Send a notification to the project manager
         try {
-            Notification notification = notificationHandler.createNotification("Project has been deleted", projectManager);
+            Notification notification = notificationHandler
+                    .createNotification("Project has been deleted", projectManager);
             notificationHandler.sendNotification(notification);
             logger.info("Notification sent for project deletion: {}", project.getProjectName());
         } catch (IOException e) {

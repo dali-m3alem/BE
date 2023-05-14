@@ -119,8 +119,8 @@ public class userImpService implements UserSer{
         }
         // Créer un nouvel utilisateur avec son rôle correspondant
         User user = User.builder()
-                .username(request.getUsername())
-                .userLastName(request.getUserLastName())
+                .firstName(request.getFirstName())
+                .userLastName(request.getLastName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -169,7 +169,7 @@ public class userImpService implements UserSer{
             throw new RuntimeException("Email already exists");
         }
         // mettre à jour les autres champs de l'utilisateur
-        user.setUsername(updatedUser.getUsername());
+        user.setFirstName(updatedUser.getFirstName());
         user.setUserLastName(updatedUser.getUserLastName());
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
@@ -197,21 +197,23 @@ public class userImpService implements UserSer{
 
     @Override
     public User updateUser(User updatedUser) {
-        User user = repository.findById(updatedUser.getId()).orElseThrow(EntityNotFoundException::new);
-        if (!updatedUser.getEmail().equals(user.getEmail()) && repository.findByEmail(updatedUser.getEmail()).isPresent()) {
+        User user = repository.findById(updatedUser.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        if (!updatedUser.getEmail().equals(user.getEmail())
+                && repository.findByEmail(updatedUser.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        // mettre à jour les autres champs de l'utilisateur
-        user.setUsername(updatedUser.getUsername());
+        // Update other user fields
+        user.setFirstName(updatedUser.getFirstName());
         user.setUserLastName(updatedUser.getUserLastName());
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
-        user.setProfilePicture(updatedUser.getProfilePicture());
         user.setTitre(updatedUser.getTitre());
         user.setRoles(updatedUser.getRoles());
-        System.out.println(user);
+
         return repository.save(user);
     }
+
     @Transactional
     public void deleteUser(Long id) {
         User user = repository.findById(id).orElseThrow(EntityNotFoundException::new);

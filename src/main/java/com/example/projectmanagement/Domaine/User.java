@@ -26,9 +26,7 @@ public class User implements Serializable,UserDetails{
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "usr_seq")
     @SequenceGenerator(name = "usr_seq",sequenceName = "usr_seq")
     private Long id;
-
-    @Column(nullable = false)
-    private String username;
+    private String firstName;
 
     private boolean activated;
 
