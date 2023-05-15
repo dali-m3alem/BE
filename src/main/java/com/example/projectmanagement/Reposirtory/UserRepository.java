@@ -18,8 +18,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Optional<User>findByEmail(String email);
 
-    @Query(value = "select * from _user u where u.username like :cle%",nativeQuery = true)
-    List<User> listUsers(@Param("cle") String username);
+    @Query(value = "select * from _user u where u.firstname like :cle%",nativeQuery = true)
+    List<User> listUsers(@Param("cle") String firstname);
     @Query("SELECT t FROM Task t WHERE t.user.id = :userId")
     List<Task> findAllTasksByUserId(@Param("userId") Long userId);
     @Query("SELECT u FROM User u")
@@ -28,4 +28,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     User findByResetToken(String resetoken);
     List<User> findAllByEmailIn(List<String> emails);
     List<User> findByRolesId(Long id);
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.RoleName = :roleName")
+    List<User> findUsersByRoleName(@Param("roleName") String roleName);
 }

@@ -35,6 +35,15 @@ public class TaskImplServ implements TaskServ{
     @PersistenceContext
     private EntityManager entityManager;
 
+    public List<Task> getTasksByActivityAndProjectAndManager(Long activityId, Long projectId, Long projectManagerId) throws Exception {
+        List<Task> tasks = taskRepository.getTasksByActivityAndProjectAndManager(activityId, projectId, projectManagerId);
+        if (tasks == null) {
+            throw new Exception("No tasks found");
+        }
+        return tasks;
+    }
+
+
     public List<Task> getTasksByUserId(Long userId) {
         String query = "SELECT t FROM Task t LEFT JOIN FETCH t.activity LEFT JOIN FETCH t.user u WHERE u.id = :userId\n";
         TypedQuery<Task> typedQuery = entityManager.createQuery(query, Task.class);
@@ -61,7 +70,6 @@ public class TaskImplServ implements TaskServ{
         Task task=new Task();
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
-        task.setCreatedBy(taskDto.getCreatedBy());
         task.setDueDate(taskDto.getDueDate());
         task.setUser(user);
         task.setActivity(activity);
@@ -80,6 +88,7 @@ public class TaskImplServ implements TaskServ{
             updatedTask.setDescription(taskDto.getDescription());
             updatedTask.setTitle(taskDto.getTitle());
             updatedTask.setDueDate(taskDto.getDueDate());
+            updatedTask.setStatus(taskDto.getStatus());
 
             String email = taskDto.getEmail();
             User user = Repository.findByEmail(email)
@@ -116,7 +125,16 @@ public class TaskImplServ implements TaskServ{
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getTasks();
     }
-
+    public Task updateTask(Task task) {
+        Optional<Task> optionalTask = taskRepository.findById(task.getId());
+        if (optionalTask.isPresent()) {
+            Task updatedTask = optionalTask.get();
+            updatedTask.setStatus(task.getStatus());
+            return taskRepository.save(updatedTask);
+        } else {
+            throw new NotFoundException("Task not found with id: " + task.getId());
+        }
+    }
 
    // public List<Task> getTasksByUserId(Long userId) {
     //    User user = new User();

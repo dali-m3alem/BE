@@ -46,8 +46,7 @@ public class ProjectImplServ implements ProjectServ{
     public List<ProjectDto> getAllProjectsByManagerId(Long managerId) {
         User manager = userRepository.findById(managerId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
-        List<Project> projects = projectRepository.findByProjectManager(manager)
-                .orElseThrow(() -> new EntityNotFoundException("Projects not found"));
+        List<Project> projects = projectRepository.findByProjectManager(manager);
         return projects.stream().map(project -> {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(project.getId());
@@ -55,7 +54,6 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setDescriptionP(project.getDescriptionP());
             projectDto.setObjectiveP(project.getObjectiveP());
             projectDto.setAdmin(project.getAdmin().getEmail());
-            projectDto.setDurationP(project.getDurationP());
             projectDto.setDeadlineP(project.getDeadlineP());
             projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
             projectDto.setStatus(project.getStatus());
@@ -64,11 +62,11 @@ public class ProjectImplServ implements ProjectServ{
             return projectDto;
         }).collect(Collectors.toList());
     }
+    @Transactional
     public List<ProjectDto> getAllProjectsByAdminId(Long adminId) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
-        List<Project> projects = projectRepository.findByAdmin(admin)
-                .orElseThrow(() -> new EntityNotFoundException("Projects not found"));
+        List<Project> projects = projectRepository.findByAdmin(admin);
         return projects.stream().map(project -> {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(project.getId());
@@ -76,15 +74,19 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setDescriptionP(project.getDescriptionP());
             projectDto.setObjectiveP(project.getObjectiveP());
             projectDto.setAdminId(project.getAdmin().getId());
-            projectDto.setDurationP(project.getDurationP());
             projectDto.setDeadlineP(project.getDeadlineP());
-            projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
+            if (project.getProjectManager() != null) {
+                projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
+            } else {
+                projectDto.setProjectManagerEmail(null); // or any other default value
+            }
             projectDto.setStatus(project.getStatus());
             projectDto.setBudget(project.getBudget());
 
             return projectDto;
         }).collect(Collectors.toList());
     }
+
     public Long countProjects() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Query query = entityManager.createQuery("SELECT COUNT(p) FROM Project p");
@@ -120,7 +122,6 @@ public class ProjectImplServ implements ProjectServ{
         project.setProjectName(projectRequest.getProjectName());
         project.setDescriptionP(projectRequest.getDescriptionP());
         project.setObjectiveP(projectRequest.getObjectiveP());
-        project.setDurationP(projectRequest.getDurationP());
         project.setProjectManager(user);
         project.setStatus("not started" );
         project.setBudget(projectRequest.getBudget());
@@ -156,7 +157,7 @@ public class ProjectImplServ implements ProjectServ{
        project.setDeadlineP(projectRequest.getDeadlineP());
        project.setObjectiveP(projectRequest.getObjectiveP());
        project.setDescriptionP(projectRequest.getDescriptionP());
-       project.setDurationP(projectRequest.getDurationP());
+
        project.setBudget(projectRequest.getBudget());
         return projectRepository.save(project);
     }

@@ -24,7 +24,6 @@ public class Task  implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id ;
     private String Title;
-    private String CreatedBy;
     private Date DueDate;
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)

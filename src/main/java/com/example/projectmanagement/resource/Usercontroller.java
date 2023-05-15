@@ -175,6 +175,10 @@ public class Usercontroller {
         return service.getUsersWithManagerRole();
 
     }
+    @GetMapping("/managersUsers")
+    public List<String> getUsersWithManagerUserRole() {
+        return service.getUsersWithManagerUserRole();
 
+    }
 }
 

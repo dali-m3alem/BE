@@ -3,14 +3,8 @@ package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.RequestAuth;
 import com.example.projectmanagement.DTO.RequestRegister;
 import com.example.projectmanagement.DTO.ResponseAuth;
-import com.example.projectmanagement.Domaine.Authorisation;
-import com.example.projectmanagement.Domaine.Task;
-import com.example.projectmanagement.Domaine.Team;
-import com.example.projectmanagement.Domaine.User;
-import com.example.projectmanagement.Reposirtory.AuthRepository;
-import com.example.projectmanagement.Reposirtory.TaskRepository;
-import com.example.projectmanagement.Reposirtory.TeamRepository;
-import com.example.projectmanagement.Reposirtory.UserRepository;
+import com.example.projectmanagement.Domaine.*;
+import com.example.projectmanagement.Reposirtory.*;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
@@ -53,6 +47,7 @@ public class userImpService implements UserSer{
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private final ProjectRepository projectRepository;
 
 
     public Long countUsers() {
@@ -125,7 +120,7 @@ public class userImpService implements UserSer{
         }
         // Créer un nouvel utilisateur avec son rôle correspondant
         User user = User.builder()
-                .username(request.getUsername())
+                .firstname(request.getFirstname())
                 .userLastName(request.getUserLastName())
                 .email(request.getEmail())
                 .phoneNumber(request.getPhoneNumber())
@@ -170,12 +165,14 @@ public class userImpService implements UserSer{
     }
     @Override
     public User updateUserWP(User updatedUser) {
-        User user = repository.findById(updatedUser.getId()).orElseThrow(EntityNotFoundException::new);
-        if (!updatedUser.getEmail().equals(user.getEmail()) && repository.findByEmail(updatedUser.getEmail()).isPresent()) {
+        User user = repository.findById(updatedUser.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        if (!updatedUser.getEmail().equals(user.getEmail())
+                && repository.findByEmail(updatedUser.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
         // mettre à jour les autres champs de l'utilisateur
-        user.setUsername(updatedUser.getUsername());
+        user.setFirstname(updatedUser.getFirstname());
         user.setUserLastName(updatedUser.getUserLastName());
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
@@ -208,7 +205,7 @@ public class userImpService implements UserSer{
             throw new RuntimeException("Email already exists");
         }
         // mettre à jour les autres champs de l'utilisateur
-        user.setUsername(updatedUser.getUsername());
+        user.setFirstname(updatedUser.getUsername());
         user.setUserLastName(updatedUser.getUserLastName());
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
@@ -229,6 +226,18 @@ public class userImpService implements UserSer{
             task.setUser(null);
             taskRepository.save(task);
         }
+        // Remove the admin from any project they are assigned to
+        List<Project> adminProject= projectRepository.findByAdmin(user);
+        for (Project project: adminProject){
+            project.setAdmin(null);
+            projectRepository.save(project);
+        }
+        // Remove the manager from any project they are assigned to
+        List<Project> managerProject= projectRepository.findByProjectManager(user);
+        for (Project project: managerProject){
+            project.setProjectManager(null);
+            projectRepository.save(project);
+        }
 
         // Remove the user from any teams they belong to
         List<Team> teams = teamRepository.findByMembersContaining(user);
@@ -241,6 +250,8 @@ public class userImpService implements UserSer{
         // Delete the user from the database
         repository.delete(user);
     }
+
+
 
 
 
@@ -304,14 +315,26 @@ public class userImpService implements UserSer{
 
 
     public List<String> getUsersWithManagerRole() {
-        List<User> usersWithManagerRole = repository.findByRolesId(Long.valueOf(2));
+        List<User> usersWithManagerUserRole = repository.findUsersByRoleName("manager");
         List<String> emails = new ArrayList<>();
-        for (User user : usersWithManagerRole) {
+        for (User user : usersWithManagerUserRole) {
             emails.add(user.getEmail());
         }
         return emails;
     }
+    public List<String> getUsersWithManagerUserRole() {
+        List<User> usersWithManagerUserRole = repository.findUsersByRoleName("manager");
+        List<User> usersWithManagerUserRole1 = repository.findUsersByRoleName("user");
 
+        List<String> emails = new ArrayList<>();
+        for (User user : usersWithManagerUserRole) {
+            emails.add(user.getEmail());
+        }
+        for (User user : usersWithManagerUserRole1) {
+            emails.add(user.getEmail());
+        }
+        return emails;
+    }
 }
 
 

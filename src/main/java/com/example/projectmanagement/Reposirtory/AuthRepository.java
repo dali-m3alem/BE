@@ -23,4 +23,5 @@ public interface AuthRepository extends JpaRepository<Authorisation,Long> {
 
     @Query(value = "select * from authorisation a where a.role_name like :cle",nativeQuery = true)
     Authorisation role(@Param("cle") String role_name);
+
 }

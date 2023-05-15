@@ -10,9 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -28,6 +26,24 @@ public class JwtService {
   public Integer extractId(String token) {
     return extClaim(token, "id");
   }
+  public List<String> extractRoles(String token) {
+    List<String> roles = new ArrayList<>();
+
+    try {
+      Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+      List<Map<String, String>> rolesMap = (List<Map<String, String>>) claims.get("roles");
+
+      for (Map<String, String> role : rolesMap) {
+        String authority = role.get("authority");
+        roles.add(authority);
+      }
+    } catch (Exception e) {
+      // Gérer les exceptions appropriées ici
+    }
+
+    return roles;
+  }
+
 
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);

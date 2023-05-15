@@ -6,6 +6,7 @@ import com.example.projectmanagement.Service.ActivityImplServ;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,13 @@ public class ActivityController {
     @Autowired
     private final JwtService jwtService;
 
+
     @GetMapping("/getActivityByProjectId/{id}")
+    @Transactional
     public ResponseEntity<?> getActivityByProjectId(@PathVariable Long id, HttpServletRequest request) {
         try{
             final String authHeader = request.getHeader("Authorization");
             String jwt = authHeader.substring(7);
-            System.out.println(jwt);
             Long managerId = Long.valueOf(jwtService.extractId(jwt));
             return ResponseEntity.status(HttpStatus.OK).body(activityService.getActivityByProjectId(id, managerId));
         } catch (Exception e){

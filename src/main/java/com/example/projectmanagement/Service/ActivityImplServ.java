@@ -32,11 +32,10 @@ public class ActivityImplServ implements ActitvtyServ{
         return activityRepository.findAll();
     }
 
-    public List<Activity> getActivityByProjectId(Long id, Long managerId) throws Exception {
-        List<Activity> activities =  activityRepository.getActivityDetails(id, managerId);
-        if(activities == null){
-            throw new Exception("No activities found");
-        }
+        public List<Activity> getActivityByProjectId(Long id, Long managerId) {
+        List<Activity> activities =  activityRepository
+                .getActivityDetails(id, managerId);
+
         return activities;
     }
 
@@ -53,13 +52,13 @@ public class ActivityImplServ implements ActitvtyServ{
         activity.setActivityName(activityDto.getActivityName());
         activity.setDescriptionA(activityDto.getDescriptionA());
         activity.setObjectiveA(activityDto.getObjectiveA());
-        activity.setDurationA(activityDto.getDurationA());
         activity.setDeadlineA(activityDto.getDeadlineA());
         activity.setProject(project);
         activity.setTeam(team);
 
         return activityRepository.save(activity);
     }
+
 
     public Activity updateActivity(ActivityDto activityDto) {
         Activity activity = activityRepository.findById(activityDto.getId()).orElse(null);
@@ -70,7 +69,7 @@ public class ActivityImplServ implements ActitvtyServ{
         activity.setActivityName(activityDto.getActivityName());
         activity.setDescriptionA(activityDto.getDescriptionA());
         activity.setObjectiveA(activityDto.getObjectiveA());
-        activity.setDurationA(activityDto.getDurationA());
+
         activity.setDeadlineA(activityDto.getDeadlineA());
 
         // set project and team
@@ -79,7 +78,7 @@ public class ActivityImplServ implements ActitvtyServ{
         activity.setProject(project);
 
         Team team = new Team();
-        team.setTeamId(activityDto.getTeamId());
+        team.setId(activityDto.getTeamId());
         activity.setTeam(team);
 
         return activityRepository.save(activity);

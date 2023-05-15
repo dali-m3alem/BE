@@ -28,7 +28,7 @@ public class User implements Serializable,UserDetails{
     private Long id;
 
     @Column(nullable = false)
-    private String username;
+    private String firstname;
 
     private boolean activated;
 
@@ -87,8 +87,9 @@ public class User implements Serializable,UserDetails{
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
+
 
     @Override
     public boolean isAccountNonExpired() {
