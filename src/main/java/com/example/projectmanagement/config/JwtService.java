@@ -38,6 +38,13 @@ public class JwtService {
     claims.put("roles", userDetails.getAuthorities()); // ou user.getAuthorities() si cela renvoie tous les rôles
     return generateToken(claims, userDetails);
   }
+  public Integer extractId(String token) {
+    return extClaim(token, "id");}
+  public <T> T extClaim(String token, String claimName) {
+    final Claims claims = extractAllClaims(token);
+    return (T) claims.get(claimName);
+  }
+
 
   public String generateToken(
       Map<String, Object> extraClaims,

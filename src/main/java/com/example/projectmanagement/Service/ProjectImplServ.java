@@ -34,8 +34,6 @@ public class ProjectImplServ implements ProjectServ{
     private final NotificationHandler notificationHandler;
 
 
-
-
     public List<Project> getAllProjects() {
 
         return projectRepository.findAll();
@@ -133,7 +131,7 @@ public class ProjectImplServ implements ProjectServ{
 
         try {
             Notification notification = notificationHandler
-                    .createNotification("A new project has been created. Please submit your planning as soon as possible.", user);
+                    .createNotification("A new project has been created", user);
             notificationHandler.sendNotification(notification);
             logger.info("Notification sent for project: {}", project.getProjectName());
 

@@ -22,10 +22,11 @@ public class Notification implements Serializable {
     private Long id;
     private String description;
     private LocalDateTime date;
+    private Boolean isRead;
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
-    private User sentTo;
+    private User sendTo;
 
 
 }
