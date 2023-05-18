@@ -24,4 +24,5 @@ public interface UserSer {
     public void changePassword(Long userId, String oldPassword, String newPassword);
     public ResponseAuth registerUser(RequestRegister request) throws IOException;
     public User getUserById(Long id);
-    public void addRoleToUser(String email, String roleName);}
+    public void addRoleToUser(String email, String roleName);
+}

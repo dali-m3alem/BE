@@ -33,7 +33,6 @@ public class ActivityImplServ implements ActitvtyServ{
     public List<Activity> getActivityByProjectId(Long id) {
         return activityRepository.findByProjectId(id);
     }
-
     public Activity getActivityById(Long id) {
         return activityRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Task not found"));
     }
@@ -78,9 +77,6 @@ public class ActivityImplServ implements ActitvtyServ{
 
         return activityRepository.save(activity);
     }
-
-
-
     public void deleteActivity(Long id) {
         activityRepository.deleteById(id);
     }

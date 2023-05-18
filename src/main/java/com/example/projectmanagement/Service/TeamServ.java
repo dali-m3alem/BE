@@ -4,6 +4,7 @@ import com.example.projectmanagement.DTO.TeamDTO;
 import com.example.projectmanagement.Domaine.Team;
 import com.example.projectmanagement.Domaine.User;
 
+import java.lang.reflect.Member;
 import java.util.List;
 
 public interface TeamServ {
@@ -12,4 +13,7 @@ public interface TeamServ {
     public Team updateTeam(TeamDTO teamRequest) ;
     public void deleteTeam(Long idTeam);
     public Team findById(Long id);
+   // public List<Member> getAllByTeamId(Long id);
+
+
 }

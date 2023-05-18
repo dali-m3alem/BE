@@ -27,7 +27,7 @@ public class Team implements Serializable {
     @Column(name = "team_name")
     private String teamName;
     private String teamDesc;
-    @OneToMany(mappedBy = "team", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
     @Column(name = "_activities")
     private Set<Activity> activities = new HashSet<>();
 
@@ -37,7 +37,6 @@ public class Team implements Serializable {
             joinColumns = @JoinColumn(name = "team_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> members = new HashSet<>();
-
 
     public void setMembers(List<User> members) {
         this.members = new HashSet<>(members);

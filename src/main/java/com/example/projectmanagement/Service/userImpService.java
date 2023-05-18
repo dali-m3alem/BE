@@ -259,17 +259,10 @@ public class userImpService implements UserSer{
         Hibernate.initialize(user.getRoles());
         return user;
     }
-
-
-
-
-
     public List<User> getUserWSUN(String ch) {
         // TODO Auto-generated method stub
         return repository.listUsers(ch);
     }
-
-
     public List<Task> findAllTasksByUserId(Long userId) {
         return repository.findAllTasksByUserId(userId);
     }
@@ -306,6 +299,7 @@ public class userImpService implements UserSer{
         String token = UUID.randomUUID().toString();
         return token.replaceAll("-", "");
     }
+
 
 
 

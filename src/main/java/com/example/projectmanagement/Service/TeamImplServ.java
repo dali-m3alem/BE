@@ -9,9 +9,11 @@ import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.reflect.Member;
 import java.util.List;
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,9 @@ public class TeamImplServ implements TeamServ{
         return teamRepository.save(team);
 
     }
-
+    public Team getTeamByActivityAndProjectAndManager(Long activityId, Long projectId, Long managerId) {
+        return teamRepository.getTeamByActivityAndProjectAndManager(activityId, projectId, managerId);
+    }
 
     public Team updateTeam(TeamDTO teamRequest) {
         List<String> emailList = teamRequest.getEmails();
@@ -69,11 +73,9 @@ public class TeamImplServ implements TeamServ{
         }
         teamRepository.delete(team);
     }
-
-
     public Team findById(Long id) {
         return teamRepository.findById(id).orElseThrow(()
-                -> new EntityNotFoundException("Project not found"));
+                -> new EntityNotFoundException("Team not found"));
     }
 
 }

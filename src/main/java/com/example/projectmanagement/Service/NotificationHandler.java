@@ -59,7 +59,6 @@ public class NotificationHandler implements WebSocketHandler {
             }
         }
     }
-
     public Notification createNotification(String description, User sentTo) {
         Notification notification = new Notification();
         notification.setDescription(description);
@@ -69,14 +68,12 @@ public class NotificationHandler implements WebSocketHandler {
         notificationRepository.save(notification);
         return notification;
     }
-
     public List<Notification> getUserNotifications(Long id) {
         User user = userRepository.findById(id).
                 orElseThrow(()
                         -> new EntityNotFoundException("User not found : " + id));
         return notificationRepository.findAllBySendTo(user);
     }
-
     public List<Notification> updateIsRead(Long id) {
         List<Notification> notifications = getUserNotifications(id);
         for (Notification notification : notifications) {

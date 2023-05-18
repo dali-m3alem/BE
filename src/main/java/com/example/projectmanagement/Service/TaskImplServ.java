@@ -128,14 +128,13 @@ public class TaskImplServ implements TaskServ{
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("task not found with id: " + id));
         User user = task.getUser();
-        taskRepository.deleteById(id);
 
         try {
             Notification notification = notificationHandler.createNotification("Task has been deleted", user);
             notificationHandler.sendNotification(notification);
             logger.info("Notification sent for task deletion: {}", task.getTitle());
         } catch (IOException e) {
-        }
+        }taskRepository.deleteById(id);
     }
 
     public List<Task> getAllTasks() {

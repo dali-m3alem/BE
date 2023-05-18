@@ -34,11 +34,11 @@ public class Project implements Serializable {
     private Long budget;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private User admin;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_leader_id")
     private User projectManager;
     @JsonIgnore
