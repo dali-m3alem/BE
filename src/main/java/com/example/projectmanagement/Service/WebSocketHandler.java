@@ -1,10 +1,13 @@
 package com.example.projectmanagement.Service;
 
+import com.example.projectmanagement.Domaine.Message;
 import com.example.projectmanagement.Domaine.Notification;
 import com.example.projectmanagement.Domaine.User;
+import com.example.projectmanagement.Reposirtory.MessageRepository;
 import com.example.projectmanagement.Reposirtory.NotificationRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
@@ -15,15 +18,17 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
-public class NotificationHandler implements WebSocketHandler {
+public class WebSocketHandler implements org.springframework.web.socket.WebSocketHandler {
 
     private List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
     private final NotificationRepository notificationRepository;
     @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
     private UserRepository userRepository;
 
 
-    public NotificationHandler(NotificationRepository notificationRepository) {
+    public WebSocketHandler(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 
@@ -67,6 +72,27 @@ public class NotificationHandler implements WebSocketHandler {
         notification.setIsRead(false);
         notificationRepository.save(notification);
         return notification;
+    }
+    public void sendMessage(Message message) throws IOException {
+        for (WebSocketSession session : sessions) {
+            if (session.isOpen()) {
+                session.sendMessage(new TextMessage(message.toString()));
+            }
+        }
+    }
+    public Message createMessage(Message message, User sender, List<User> recipients){
+        message.setSender(sender);
+        message.setRecipients(recipients);
+        message.setLocalDateTime(LocalDateTime.now());
+        message.setContent(message.getContent());
+        messageRepository.save(message);
+        return message;
+    }
+    public List<Message> getMessagesBetweenTwoUsersById(Long sender, Long recipients){
+        return messageRepository.findMessagesBetweenTwoUsersById(sender,recipients);
+    }
+    public List<Message> getMessagesByUserId(Long userId) {
+        return messageRepository.findByRecipientsId(userId);
     }
     public List<Notification> getUserNotifications(Long id) {
         User user = userRepository.findById(id).

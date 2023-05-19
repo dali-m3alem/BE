@@ -80,6 +80,8 @@ public class User implements Serializable,UserDetails{
     //all notifications deleted with user
     @OneToMany(mappedBy = "sendTo",fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
+    @OneToMany(mappedBy = "sender",fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> sentMessages;
 
     @Override
     public String getPassword() {

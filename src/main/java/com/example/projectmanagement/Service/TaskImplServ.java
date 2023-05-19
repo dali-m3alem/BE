@@ -28,7 +28,7 @@ public class TaskImplServ implements TaskServ{
     private final TaskRepository taskRepository;
     private final UserRepository Repository;
     private final ActivityRepository activityRepository;
-    private final NotificationHandler notificationHandler;
+    private final WebSocketHandler webSocketHandler;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -67,8 +67,8 @@ public class TaskImplServ implements TaskServ{
         task.setManager(id);
         task = taskRepository.save(task);
         try {
-            Notification notification = notificationHandler.createNotification("A new task has been created to you", user);
-            notificationHandler.sendNotification(notification);
+            Notification notification = webSocketHandler.createNotification("A new task has been created to you", user);
+            webSocketHandler.sendNotification(notification);
             logger.info("Notification sent for task: {}", task.getTitle());
 
         } catch (IOException e) {
@@ -101,8 +101,8 @@ public class TaskImplServ implements TaskServ{
             updatedTask= taskRepository.save(updatedTask);
 
             try {
-                Notification notification = notificationHandler.createNotification("A task has been updated to you", user);
-                notificationHandler.sendNotification(notification);
+                Notification notification = webSocketHandler.createNotification("A task has been updated to you", user);
+                webSocketHandler.sendNotification(notification);
                 logger.info("Notification sent for task: {}", updatedTask.getTitle());
 
             } catch (IOException e) {
@@ -130,8 +130,8 @@ public class TaskImplServ implements TaskServ{
         User user = task.getUser();
 
         try {
-            Notification notification = notificationHandler.createNotification("Task has been deleted", user);
-            notificationHandler.sendNotification(notification);
+            Notification notification = webSocketHandler.createNotification("Task has been deleted", user);
+            webSocketHandler.sendNotification(notification);
             logger.info("Notification sent for task deletion: {}", task.getTitle());
         } catch (IOException e) {
         }taskRepository.deleteById(id);

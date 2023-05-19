@@ -25,4 +25,6 @@ public interface UserSer {
     public ResponseAuth registerUser(RequestRegister request) throws IOException;
     public User getUserById(Long id);
     public void addRoleToUser(String email, String roleName);
+    List<User> findUsersByIds(List<Long> userIds);
+    public User findUserById(Long userId);
 }

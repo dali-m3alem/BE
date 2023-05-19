@@ -31,7 +31,7 @@ public class ProjectImplServ implements ProjectServ{
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final EntityManagerFactory entityManagerFactory;
-    private final NotificationHandler notificationHandler;
+    private final WebSocketHandler webSocketHandler;
 
 
     public List<Project> getAllProjects() {
@@ -130,9 +130,9 @@ public class ProjectImplServ implements ProjectServ{
         project = projectRepository.save(project);
 
         try {
-            Notification notification = notificationHandler
+            Notification notification = webSocketHandler
                     .createNotification("A new project has been created", user);
-            notificationHandler.sendNotification(notification);
+            webSocketHandler.sendNotification(notification);
             logger.info("Notification sent for project: {}", project.getProjectName());
 
         } catch (IOException e) {
@@ -177,9 +177,9 @@ public class ProjectImplServ implements ProjectServ{
         project= projectRepository.save(project);
 
         try {
-            Notification notification = notificationHandler
+            Notification notification = webSocketHandler
                     .createNotification("Project has been updated", user);
-            notificationHandler.sendNotification(notification);
+            webSocketHandler.sendNotification(notification);
             logger.info("Notification sent for project: {}", project.getProjectName());
 
         } catch (IOException e) {
@@ -203,9 +203,9 @@ public class ProjectImplServ implements ProjectServ{
 
         // Send a notification to the project manager
         try {
-            Notification notification = notificationHandler
+            Notification notification = webSocketHandler
                     .createNotification("Project has been deleted", projectManager);
-            notificationHandler.sendNotification(notification);
+            webSocketHandler.sendNotification(notification);
             logger.info("Notification sent for project deletion: {}", project.getProjectName());
         } catch (IOException e) {
             // Handle the exception

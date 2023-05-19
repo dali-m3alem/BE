@@ -299,6 +299,13 @@ public class userImpService implements UserSer{
         String token = UUID.randomUUID().toString();
         return token.replaceAll("-", "");
     }
+    public List<User> findUsersByIds(List<Long> userIds) {
+        return repository.findAllById(userIds);
+    }
+    public User findUserById(Long userId) {
+        Optional<User> userOptional = repository.findById(userId);
+        return userOptional.orElse(null);
+    }
 
 
 
