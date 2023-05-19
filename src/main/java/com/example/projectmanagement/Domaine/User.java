@@ -47,6 +47,10 @@ public class User implements Serializable,UserDetails{
 
     private String titre;
     private String resetToken;
+    //all notifications deleted with user
+    @OneToMany(mappedBy = "sendTo",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
+
     @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 
@@ -60,7 +64,8 @@ public class User implements Serializable,UserDetails{
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "auth_id"))
     private Set<Authorisation> roles = new HashSet<>();
-
+    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
+    private Set<Team> teams = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

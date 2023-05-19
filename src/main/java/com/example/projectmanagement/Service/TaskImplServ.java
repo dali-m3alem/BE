@@ -3,21 +3,23 @@ package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.ActivityDto;
 import com.example.projectmanagement.DTO.TaskDto;
 import com.example.projectmanagement.DTO.UserDto;
-import com.example.projectmanagement.Domaine.Activity;
-import com.example.projectmanagement.Domaine.Task;
-import com.example.projectmanagement.Domaine.User;
+import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
+import com.example.projectmanagement.Reposirtory.NotificationRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 @RequiredArgsConstructor
@@ -25,15 +27,19 @@ public class TaskImplServ implements TaskServ{
 
 
 
-    @Autowired
-    private TaskRepository taskRepository;
-    @Autowired
-    private UserRepository Repository;
-    @Autowired
-    private ActivityRepository activityRepository;
+    private final TaskRepository taskRepository;
+    private final UserRepository Repository;
+    private final ActivityRepository activityRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationHandler notificationHandler;
+
 
     @PersistenceContext
     private EntityManager entityManager;
+    public int countTasksNotDone() {
+        return taskRepository.countTasksNotDone();
+    }
+
 
     public List<Task> getTasksByActivityAndProjectAndManager(Long activityId, Long projectId, Long projectManagerId) throws Exception {
         List<Task> tasks = taskRepository.getTasksByActivityAndProjectAndManager(activityId, projectId, projectManagerId);
@@ -57,17 +63,22 @@ public class TaskImplServ implements TaskServ{
         return typedQuery.getResultList();
     }
 
+    //we add notification each time we create task for user
+
+
+
+
 
     public Task createTask(TaskDto taskDto) {
         String email = taskDto.getEmail();
         User user = Repository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        Activity activity= activityRepository.findById(taskDto.getActivity()).orElseThrow(()
+        Activity activity = activityRepository.findById(taskDto.getActivity()).orElseThrow(()
                 -> new IllegalArgumentException("Invalid activity id"));
         Long manager = taskDto.getManager();
         User id = Repository.findById(manager)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
-        Task task=new Task();
+        Task task = new Task();
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
         task.setDueDate(taskDto.getDueDate());
@@ -75,11 +86,18 @@ public class TaskImplServ implements TaskServ{
         task.setActivity(activity);
         task.setStatus("todo");
         task.setManager(id);
-        return taskRepository.save(task);
+        task = taskRepository.save(task);
+        String nameTask=taskDto.getTitle();
+        try {
+            Notification notification = notificationHandler.createNotification("A new task"+nameTask+" has been created to you", user);
+            notificationHandler.sendNotification(notification);
+
+        } catch (IOException e) {
+            // Handle the exception
+        }
+
+        return task;
     }
-
-
-
 
     public Task updateTask(TaskDto taskDto, Long id) {
         Optional<Task> optionalTask = taskRepository.findById(id);
@@ -88,7 +106,6 @@ public class TaskImplServ implements TaskServ{
             updatedTask.setDescription(taskDto.getDescription());
             updatedTask.setTitle(taskDto.getTitle());
             updatedTask.setDueDate(taskDto.getDueDate());
-            updatedTask.setStatus(taskDto.getStatus());
 
             String email = taskDto.getEmail();
             User user = Repository.findByEmail(email)
@@ -99,10 +116,22 @@ public class TaskImplServ implements TaskServ{
             updatedTask.setUser(user);
             updatedTask.setActivity(activity);
 
-            return taskRepository.save(updatedTask);
+            updatedTask= taskRepository.save(updatedTask);
+
+            try {
+                Notification notification = notificationHandler.createNotification("A task has been updated to you", user);
+                notificationHandler.sendNotification(notification);
+
+            } catch (IOException e) {
+                // Handle the exception
+            }
+
+            return updatedTask;
+
         } else {
             throw new NotFoundException("Task not found with id: " + id);
         }
+
     }
 
     public class NotFoundException extends RuntimeException {
@@ -112,20 +141,22 @@ public class TaskImplServ implements TaskServ{
     }
 
 
-
     public void deleteTask(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("task not found with id: " + id));
+        User user = task.getUser();
         taskRepository.deleteById(id);
+
+        try {
+            Notification notification = notificationHandler.createNotification("Task has been deleted", user);
+            notificationHandler.sendNotification(notification);
+        } catch (IOException e) {
+        }
     }
 
-    public List<Task> getAllTasks() {
-        return (List<Task>) taskRepository.findAll();
-    }
-    public List<Task> getAllTasksOfUser(String email) {
-        User user = Repository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getTasks();
-    }
-    public Task updateTask(Task task) {
+
+
+    public Task updateTask1(Task task) {
         Optional<Task> optionalTask = taskRepository.findById(task.getId());
         if (optionalTask.isPresent()) {
             Task updatedTask = optionalTask.get();
@@ -134,6 +165,16 @@ public class TaskImplServ implements TaskServ{
         } else {
             throw new NotFoundException("Task not found with id: " + task.getId());
         }
+    }
+
+
+    public List<Task> getAllTasks() {
+        return (List<Task>) taskRepository.findAll();
+    }
+    public List<Task> getAllTasksOfUser(String email) {
+        User user = Repository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getTasks();
     }
 
    // public List<Task> getTasksByUserId(Long userId) {

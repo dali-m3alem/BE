@@ -32,6 +32,10 @@ public class Usercontroller {
 
 
 
+    @GetMapping("/{teamId}/members")
+    public List<User> getTeamMembers(@PathVariable Long teamId) {
+        return service.findMembersByTeamId(teamId);
+    }
     @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ResponseAuth> registerUser(@Valid @ModelAttribute RequestRegister request) throws IOException {
         try {

@@ -23,7 +23,7 @@ import java.util.Set;
         @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "team_seq")
         @SequenceGenerator(name = "team_seq",sequenceName = "team_seq")
         private Long id;
-        @Column(name = "team_name")
+        @Column(name = "team_name",nullable = false)
         private String teamName;
         private String teamDesc;
         @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)

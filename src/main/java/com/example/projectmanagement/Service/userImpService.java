@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -181,7 +182,7 @@ public class userImpService implements UserSer{
     }
 
     @Override
-    public void changePassword(Long id, String oldPassword, String newPassword) {
+    public void  changePassword(Long id, String oldPassword, String newPassword) {
         User user = repository.findById(id).orElseThrow(EntityNotFoundException::new);
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
@@ -335,6 +336,17 @@ public class userImpService implements UserSer{
         }
         return emails;
     }
+    public List<User> findMembersByTeamId(Long userId) {
+            Optional<User> userOptional = repository.findById(userId);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                return new ArrayList<>(user.getTeams().stream()
+                        .flatMap(team -> team.getMembers().stream())
+                        .collect(Collectors.toSet()));
+            }
+            return Collections.emptyList();
+        }
+
 }
 
 

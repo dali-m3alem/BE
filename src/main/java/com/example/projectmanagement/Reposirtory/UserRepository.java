@@ -26,8 +26,10 @@ public interface UserRepository extends JpaRepository<User,Long> {
     List<User> findAllWithoutTasks();
     void deleteById(Long id);
     User findByResetToken(String resetoken);
+
     List<User> findAllByEmailIn(List<String> emails);
     List<User> findByRolesId(Long id);
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.RoleName = :roleName")
     List<User> findUsersByRoleName(@Param("roleName") String roleName);
+
 }

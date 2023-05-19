@@ -19,6 +19,7 @@ public class ActivityDto {
     private String durationA;
     private Date deadlineA;
     private Long projectId;
-    private Long teamId;
+    private String teamName
+            ;
 
 }

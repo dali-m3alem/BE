@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class TeamController {
         }
     }
     @GetMapping("/ids")
-    public List<Long> getAllTeamIds() {
+    public List<String> getAllTeamIds() {
         return teamService.getAllTeamIds();
     }
     @GetMapping(value = "/getAllTeam")
@@ -51,15 +52,25 @@ public class TeamController {
     }
 
     @PostMapping(value = "/addTeam")
-    public Team addTeam(@RequestBody TeamDTO teamRequest)
-    {
-        return teamService.addTeam(teamRequest);
+    public ResponseEntity<Team> addTeam(@RequestBody TeamDTO teamRequest) {
+        try {
+            Team team = teamService.addTeam(teamRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(team);
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(null);
+        }
     }
 
+
     @PutMapping(value = "/updateTeam/{idTeam}")
-    public Team updateTeam(@RequestBody  TeamDTO teamRequest)
-    {
-        return teamService.updateTeam(teamRequest);
+    public ResponseEntity<Team> updateTeam(@RequestBody  TeamDTO teamRequest) {
+        try {
+             Team team= teamService.updateTeam(teamRequest);
+            return ResponseEntity.status(HttpStatus.OK).body(team);
+
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(null);
+        }
     }
 
     @DeleteMapping(value = "/deleteTeam/{idTeam}")

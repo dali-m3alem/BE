@@ -26,6 +26,11 @@ public class TaskController {
     private TaskRepository taskRepository;
     @Autowired
     private  JwtService jwtService;
+
+    @GetMapping("/countTask")
+    public int countTasksNotDone() {
+        return taskservice.countTasksNotDone();
+    }
     @GetMapping("/getTasksByActivityAndProjectAndManager/{activityId}/{projectId}")
     public ResponseEntity<?> getTasksByActivityAndProjectAndManager(@PathVariable Long activityId, @PathVariable Long projectId, HttpServletRequest request) {
         try {
@@ -49,11 +54,6 @@ public class TaskController {
         return taskservice.getTasksByManagerId(managerId);
     }
 
-    @PostMapping("/create1")
-    public ResponseEntity<Task> createTask(@RequestBody TaskDto taskDto) {
-        Task newTask = taskservice.createTask(taskDto);
-        return ResponseEntity.ok(newTask);
-    }
     @PostMapping("/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDto taskDto, HttpServletRequest request) {
         try {
@@ -75,8 +75,11 @@ public class TaskController {
         }
     }
 
-
-
+    @PutMapping("/update")
+    public ResponseEntity<Task> updateTask(@RequestBody Task task) {
+        Task updatedTask = taskservice.updateTask1(task);
+        return new ResponseEntity<>(updatedTask, HttpStatus.OK);
+    }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody TaskDto taskDto) {
@@ -84,17 +87,14 @@ public class TaskController {
         return ResponseEntity.ok(updatedTask);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Task> updateTask(@RequestBody Task task) {
-        Task updatedTask = taskservice.updateTask(task);
-        return new ResponseEntity<>(updatedTask, HttpStatus.OK);
-    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskservice.deleteTask(id);
         return ResponseEntity.noContent().build();
     }
+
+
 
     @GetMapping("/getAllTasks")
     public List<Task> getAllUsers() {
@@ -104,7 +104,6 @@ public class TaskController {
 
      @GetMapping( "/getAllTasks/{str}")
      public List<Task> getAllTasksOfAuthenticatedUser(@PathVariable("str") String str) {
-
          return taskservice.getAllTasksOfUser(str);
      }
     @GetMapping("/tasks")

@@ -46,7 +46,7 @@ public class ActivityImplServ implements ActitvtyServ{
         public Activity createActivity(ActivityDto activityDto) {
         Project project= projectRepository.findById(activityDto.getProjectId()).orElseThrow(()
                 -> new IllegalArgumentException("Invalid project id"));
-        Team team = teamRepository.findById(activityDto.getTeamId()).orElseThrow(()
+        Team team = teamRepository.findByTeamName(activityDto.getTeamName()).orElseThrow(()
                 -> new IllegalArgumentException("Invalid team id"));
         Activity activity = new Activity();
         activity.setActivityName(activityDto.getActivityName());
@@ -76,9 +76,11 @@ public class ActivityImplServ implements ActitvtyServ{
         Project project = new Project();
         project.setId(activityDto.getProjectId());
         activity.setProject(project);
+        Team team = teamRepository.findByTeamName(activityDto.getTeamName())
+                .orElseThrow(() -> new EntityNotFoundException("Team with name  not found"));
 
-        Team team = new Team();
-        team.setId(activityDto.getTeamId());
+        team.setTeamName(activityDto.getTeamName());
+
         activity.setTeam(team);
 
         return activityRepository.save(activity);

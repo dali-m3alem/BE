@@ -22,5 +22,6 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
     @Query("SELECT t FROM Task t WHERE t.activity.id = ?1 AND t.activity.project.id = ?2 AND t.activity.project.projectManager.id = ?3")
     List<Task> getTasksByActivityAndProjectAndManager(Long activityId, Long projectId, Long projectManagerId);
 
-
+    @Query("SELECT COUNT(t) FROM Task t WHERE t.status <> 'done'")
+    int countTasksNotDone();
 }

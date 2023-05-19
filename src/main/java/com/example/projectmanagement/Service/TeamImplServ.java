@@ -9,13 +9,19 @@ import com.example.projectmanagement.Domaine.User;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.TeamRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class TeamImplServ implements TeamServ{
@@ -34,6 +40,13 @@ public class TeamImplServ implements TeamServ{
         return teamRepository.getTeamByActivityAndProjectAndManager(activityId, projectId, managerId);
     }
     public Team addTeam(TeamDTO teamRequest) {
+        String teamName = teamRequest.getTeamName();
+        Optional<Team> existingTeam = teamRepository.findByTeamName(teamName);
+
+        if (existingTeam.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team with the same name already exists.");
+        }
+
         List<String> emailList = teamRequest.getEmails();
         List<User> users = userRepository.findAllByEmailIn(emailList);
 
@@ -46,7 +59,6 @@ public class TeamImplServ implements TeamServ{
         team.setTeamDesc(teamRequest.getTeamDesc());
         team.setMembers(users);
 
-
         return teamRepository.save(team);
     }
 
@@ -54,11 +66,16 @@ public class TeamImplServ implements TeamServ{
     public Team updateTeam(TeamDTO teamRequest) {
         List<String> emailList = teamRequest.getEmails();
         List<User> users = userRepository.findAllByEmailIn(emailList);
+        String teamName=teamRequest.getTeamName();
+        Optional<Team> existingTeam = teamRepository.findByTeamName(teamName);
+        Team teamToUpdate = teamRepository.findById(teamRequest.getTeamId()).get();
 
+        if (!teamRequest.getTeamName().equals(teamToUpdate.getTeamName()) && existingTeam.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team with the same name already exists.");
+        }
         if (users.isEmpty()) {
             throw new EntityNotFoundException("No users found with given emails.");
         }
-        Team teamToUpdate = teamRepository.findById(teamRequest.getTeamId()).get();
         teamToUpdate.setTeamName(teamRequest.getTeamName());
         teamToUpdate.setTeamDesc(teamRequest.getTeamDesc());
         teamToUpdate.setMembers(users);
@@ -75,16 +92,18 @@ public class TeamImplServ implements TeamServ{
         teamRepository.delete(team);
     }
 
-    public List<Long> getAllTeamIds() {
+    public List<String> getAllTeamIds() {
         List<Team> teams = teamRepository.findAll();
-        List<Long> teamIds = new ArrayList<>();
+        List<String> teamIds = new ArrayList<>();
         for (Team team : teams) {
-            teamIds.add(team.getId());
+            teamIds.add(team.getTeamName());
         }
         return teamIds;
     }
     public Team findById(Long id) {
         return teamRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Project not found"));
     }
+
+
 
 }
