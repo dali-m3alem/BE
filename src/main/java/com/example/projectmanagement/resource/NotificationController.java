@@ -2,7 +2,7 @@ package com.example.projectmanagement.resource;
 
 import com.example.projectmanagement.Domaine.Notification;
 import com.example.projectmanagement.Reposirtory.NotificationRepository;
-import com.example.projectmanagement.Service.NotificationHandler;
+import com.example.projectmanagement.Service.WebSocketHandler;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -18,23 +18,24 @@ import java.util.List;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class NotificationController {
-    private final NotificationRepository notificationRepository;
-    private final NotificationHandler notificationHandler;
+    private final WebSocketHandler webSocketHandler;
     private final JwtService jwtService;
+
     @GetMapping("/getUserNotifications")
     public List<Notification> getUserNotifications(HttpServletRequest request){
-            final String authHeader = request.getHeader("Authorization");
-            String jwt = authHeader.substring(7);
-            Long Id = Long.valueOf(jwtService.extractId(jwt));
-        return notificationHandler.getUserNotifications(Id);
+        final String authHeader = request.getHeader("Authorization");
+        String jwt = authHeader.substring(7);
+        Long Id = Long.valueOf(jwtService.extractId(jwt));
+        return webSocketHandler.getUserNotifications(Id);
     }
     @PutMapping("/{userId}/markAsRead")
     public ResponseEntity<List<Notification>> markUserNotificationsAsRead(@PathVariable Long userId) {
-        List<Notification> updatedNotifications = notificationHandler.updateIsRead(userId);
+        List<Notification> updatedNotifications = webSocketHandler.updateIsRead(userId);
         return ResponseEntity.ok(updatedNotifications);
     }
 
-
-
-
+    @GetMapping("/unread-count/{userId}")
+    public long getUnreadNotificationCountForUser(@PathVariable Long userId) {
+        return webSocketHandler.countUnreadNotificationsForUser(userId);
+    }
 }

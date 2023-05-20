@@ -31,7 +31,7 @@ public class TaskImplServ implements TaskServ{
     private final UserRepository Repository;
     private final ActivityRepository activityRepository;
     private final NotificationRepository notificationRepository;
-    private final NotificationHandler notificationHandler;
+    private final WebSocketHandler webSocketHandler;
 
 
     @PersistenceContext
@@ -89,8 +89,8 @@ public class TaskImplServ implements TaskServ{
         task = taskRepository.save(task);
         String nameTask=taskDto.getTitle();
         try {
-            Notification notification = notificationHandler.createNotification("A new task"+nameTask+" has been created to you", user);
-            notificationHandler.sendNotification(notification);
+            Notification notification = webSocketHandler.createNotification("A new task"+nameTask+" has been created to you", user);
+            webSocketHandler.sendNotification(notification);
 
         } catch (IOException e) {
             // Handle the exception
@@ -119,8 +119,8 @@ public class TaskImplServ implements TaskServ{
             updatedTask= taskRepository.save(updatedTask);
 
             try {
-                Notification notification = notificationHandler.createNotification("A task has been updated to you", user);
-                notificationHandler.sendNotification(notification);
+                Notification notification = webSocketHandler.createNotification("A task has been updated to you", user);
+                webSocketHandler.sendNotification(notification);
 
             } catch (IOException e) {
                 // Handle the exception
@@ -148,8 +148,8 @@ public class TaskImplServ implements TaskServ{
         taskRepository.deleteById(id);
 
         try {
-            Notification notification = notificationHandler.createNotification("Task has been deleted", user);
-            notificationHandler.sendNotification(notification);
+            Notification notification = webSocketHandler.createNotification("Task has been deleted", user);
+            webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
         }
     }

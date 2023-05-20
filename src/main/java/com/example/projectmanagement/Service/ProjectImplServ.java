@@ -29,7 +29,7 @@ public class ProjectImplServ implements ProjectServ{
     private final TaskRepository taskRepository;
     private final TeamRepository teamRepository;
     private final NotificationRepository notificationRepository;
-    private final NotificationHandler notificationHandler;
+    private final WebSocketHandler webSocketHandler;
 
 
     public List<Project> getAllProjects() {
@@ -137,8 +137,8 @@ public class ProjectImplServ implements ProjectServ{
 
         try {
             String notificationContent = "A new project " + projectName + " has been created. Please submit your planning as soon as possible.";
-            Notification notification = notificationHandler.createNotification(notificationContent, user);
-            notificationHandler.sendNotification(notification);
+            Notification notification = webSocketHandler.createNotification(notificationContent, user);
+            webSocketHandler.sendNotification(notification);
 
         } catch (IOException e) {
             // Handle the exception
@@ -170,9 +170,9 @@ public class ProjectImplServ implements ProjectServ{
         project= projectRepository.save(project);
 
         try {
-            Notification notification = notificationHandler
+            Notification notification = webSocketHandler
                     .createNotification("Project has been updated", user);
-            notificationHandler.sendNotification(notification);
+            webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
             // Handle the exception
         }
@@ -192,9 +192,9 @@ public class ProjectImplServ implements ProjectServ{
         User projectManager = project.getProjectManager();
         // Send a notification to the project manager
         try {
-            Notification notification = notificationHandler
+            Notification notification = webSocketHandler
                     .createNotification("Project has been deleted", projectManager);
-            notificationHandler.sendNotification(notification);
+            webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
             // Handle the exception
         }

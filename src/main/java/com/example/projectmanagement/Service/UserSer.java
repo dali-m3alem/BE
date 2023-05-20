@@ -21,8 +21,10 @@ public interface UserSer {
     public User updateUser(User updatedUser);
     public void deleteUser(Long id);
     public List<User> getUserWSUN(String ch);
-    public List<User> findAllWithoutTasks()
-;public void changePassword(Long userId, String oldPassword, String newPassword);
-    public ResponseAuth registerUser(RequestRegister request) throws IOException
-            ;    public User getUserById(Long id);
-    public void addRoleToUser(String email, String roleName);}
+    public List<User> findAllWithoutTasks();
+    public void changePassword(Long userId, String oldPassword, String newPassword);
+    public ResponseAuth registerUser(RequestRegister request) throws IOException;    public User getUserById(Long id);
+    public void addRoleToUser(String email, String roleName);
+    public List<User> findUsersByIds(List<Long> userIds);
+    public User findUserById(Long userId);
+}

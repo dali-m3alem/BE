@@ -49,6 +49,7 @@ public class userImpService implements UserSer{
     private PasswordEncoder passwordEncoder;
 
     private final ProjectRepository projectRepository;
+    private final MessageRepository messageRepository;
 
 
     public Long countUsers() {
@@ -246,16 +247,15 @@ public class userImpService implements UserSer{
             team.removeMember(user);
             teamRepository.save(team);
         }
-
+        List<Message> messages = messageRepository.findBySenderOrRecipients(user,user);
+        for (Message message:messages) {
+            messages.remove(message);
+            messageRepository.save(message);
+        }
 
         // Delete the user from the database
         repository.delete(user);
     }
-
-
-
-
-
 
     @Transactional
     public User getUserById(Long id) {
@@ -265,11 +265,6 @@ public class userImpService implements UserSer{
         Hibernate.initialize(user.getRoles());
         return user;
     }
-
-
-
-
-
     public List<User> getUserWSUN(String ch) {
         // TODO Auto-generated method stub
         return repository.listUsers(ch);
@@ -346,7 +341,13 @@ public class userImpService implements UserSer{
             }
             return Collections.emptyList();
         }
-
+    public List<User> findUsersByIds(List<Long> userIds) {
+        return repository.findAllById(userIds);
+    }
+    public User findUserById(Long userId) {
+        Optional<User> userOptional = repository.findById(userId);
+        return userOptional.orElse(null);
+    }
 }
 
 

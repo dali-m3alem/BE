@@ -134,6 +134,7 @@ public class Usercontroller {
     @DeleteMapping("/deleteUser")
     public ResponseEntity<?> deleteUser(@RequestParam Long id) {
         service.deleteUser(id);
+
         return ResponseEntity.ok().build();
     }
 

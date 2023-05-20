@@ -9,4 +9,6 @@ import java.util.Optional;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findAllBySendTo(User user1);
+    long countByIsReadAndSendToId(boolean isRead, Long userId);
+
 }
