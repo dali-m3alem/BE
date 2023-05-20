@@ -9,11 +9,15 @@ import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -27,6 +31,7 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
     @Autowired
     private UserRepository userRepository;
 
+    private final List<WebSocketSession> webSocketSessions = new ArrayList<>();
 
     public WebSocketHandler(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
@@ -41,8 +46,7 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         // Handle transport errors if needed
     }
-
-    @Override
+       @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         // Handle incoming messages if needed
     }
@@ -73,7 +77,7 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
         notificationRepository.save(notification);
         return notification;
     }
-    public void sendMessage(Message message) throws IOException {
+  /*  public void sendMessage(Message message) throws IOException {
         for (WebSocketSession session : sessions) {
             if (session.isOpen()) {
                 session.sendMessage(new TextMessage(message.toString()));
@@ -93,7 +97,7 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
     }
     public List<Message> getMessagesByUserId(Long userId) {
         return messageRepository.findByRecipientsId(userId);
-    }
+    } */
     public List<Notification> getUserNotifications(Long id) {
         User user = userRepository.findById(id).
                 orElseThrow(()
@@ -108,6 +112,7 @@ public class WebSocketHandler implements org.springframework.web.socket.WebSocke
             }
         return notifications;
     }
+
+    //chat methods and chat websocket stuff
+
 }
-
-

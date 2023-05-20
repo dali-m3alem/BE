@@ -24,10 +24,9 @@ public class Message implements Serializable {
     @SequenceGenerator(name = "auth_seq",sequenceName = "msg_seq")
     private Long id;
     private String content;
-    private LocalDateTime localDateTime;
-
-    @Enumerated(EnumType.STRING)
-    private MessageType type;
+    private LocalDateTime timestamp;
+    private String conversationId;
+    private boolean isGroupConversation;
 
     @ManyToOne
     @JoinColumn(name = "sender_id")

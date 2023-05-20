@@ -1,4 +1,4 @@
-package com.example.projectmanagement.DTO;
+/*package com.example.projectmanagement.DTO;
 
 import com.example.projectmanagement.Domaine.MessageType;
 import lombok.AllArgsConstructor;
@@ -17,3 +17,4 @@ public class MessageDTO {
     private List<Long> recipientIds;
     private String content;
 }
+*/
