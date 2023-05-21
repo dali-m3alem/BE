@@ -50,8 +50,6 @@ public class User implements Serializable,UserDetails{
     //all notifications deleted with user
     @OneToMany(mappedBy = "sendTo",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
-    @OneToMany(mappedBy = "sender",fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Message> sendMessages;
     @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 

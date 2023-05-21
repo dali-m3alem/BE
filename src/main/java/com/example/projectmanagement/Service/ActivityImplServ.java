@@ -27,17 +27,19 @@ public class ActivityImplServ implements ActitvtyServ{
     }
 
 
-    @Override
     public List<Activity> getAllActivity() {
         return activityRepository.findAll();
     }
 
-        public List<Activity> getActivityByProjectId(Long id, Long managerId) {
-        List<Activity> activities =  activityRepository
-                .getActivityDetails(id, managerId);
 
-        return activities;
-    }
+
+    /*   public List<Activity> getActivityByProjectId(Long id, Long managerId) {
+       return activityRepository
+               .getActivityDetails(id, managerId);
+   }*/
+     public List<Activity> getActivityByProjectId(Long id) {
+         return activityRepository.findByProjectId(id);
+     }
 
     public Activity getActivityById(Long id) {
         return activityRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Task not found"));

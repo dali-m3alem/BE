@@ -23,7 +23,7 @@ public class Notification implements Serializable {
     private String description;
     private LocalDateTime date;
     private Boolean isRead;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User sendTo;

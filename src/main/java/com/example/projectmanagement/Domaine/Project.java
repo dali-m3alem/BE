@@ -42,7 +42,7 @@ public class Project implements Serializable {
     @JoinColumn(name = "team_leader_id")
     private User projectManager;
     @JsonIgnore
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL,fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL,fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Activity> activities = new ArrayList<>();
 
 }

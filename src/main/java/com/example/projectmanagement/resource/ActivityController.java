@@ -28,17 +28,8 @@ public class ActivityController {
 
 
     @GetMapping("/getActivityByProjectId/{id}")
-    @Transactional
-    public ResponseEntity<?> getActivityByProjectId(@PathVariable Long id, HttpServletRequest request) {
-        try{
-            final String authHeader = request.getHeader("Authorization");
-            String jwt = authHeader.substring(7);
-            Long managerId = Long.valueOf(jwtService.extractId(jwt));
-            return ResponseEntity.status(HttpStatus.OK).body(activityService.getActivityByProjectId(id, managerId));
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " +  e.getMessage());
-        }
-
+    public List<Activity> getActivityByProjectId(@PathVariable Long id) {
+        return activityService.getActivityByProjectId(id);
     }
 
     @GetMapping("/getActivityById/{id}")

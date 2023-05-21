@@ -30,7 +30,7 @@ import java.util.Set;
         @Column(name = "_activities")
         private Set<Activity> activities = new HashSet<>();
 
-        @ManyToMany(fetch = FetchType.EAGER)
+        @ManyToMany(fetch = FetchType.LAZY)
         @JoinTable(
                 name = "team_members",
                 joinColumns = @JoinColumn(name = "team_id"),

@@ -49,7 +49,7 @@ public class userImpService implements UserSer{
     private PasswordEncoder passwordEncoder;
 
     private final ProjectRepository projectRepository;
-    private final MessageRepository messageRepository;
+
 
 
     public Long countUsers() {
@@ -202,23 +202,22 @@ public class userImpService implements UserSer{
 
     @Override
     public User updateUser(User updatedUser) {
-        User user = repository.findById(updatedUser.getId()).orElseThrow(EntityNotFoundException::new);
-        if (!updatedUser.getEmail().equals(user.getEmail()) && repository.findByEmail(updatedUser.getEmail()).isPresent()) {
+        User user = repository.findById(updatedUser.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        if (!updatedUser.getEmail().equals(user.getEmail())
+                && repository.findByEmail(updatedUser.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        // mettre à jour les autres champs de l'utilisateur
-        user.setFirstname(updatedUser.getUsername());
+        // Update other user fields
+        user.setFirstname(updatedUser.getFirstname());
         user.setUserLastName(updatedUser.getUserLastName());
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
         user.setTitre(updatedUser.getTitre());
         user.setRoles(updatedUser.getRoles());
-        System.out.println(user);
+
         return repository.save(user);
     }
-
-
-    @Transactional
     public void deleteUser(Long id) {
         User user = repository.findById(id).orElseThrow(EntityNotFoundException::new);
 
@@ -240,22 +239,25 @@ public class userImpService implements UserSer{
             project.setProjectManager(null);
             projectRepository.save(project);
         }
-
+        List<Task> userTask = taskRepository.findByManager(user);
+        for (Task task : userTask) {
+            task.setManager(null);
+            taskRepository.save(task);
+        }
         // Remove the user from any teams they belong to
         List<Team> teams = teamRepository.findByMembersContaining(user);
         for (Team team : teams) {
             team.removeMember(user);
             teamRepository.save(team);
         }
-        List<Message> messages = messageRepository.findBySenderOrRecipients(user,user);
-        for (Message message:messages) {
-            messages.remove(message);
-            messageRepository.save(message);
-        }
+
 
         // Delete the user from the database
         repository.delete(user);
     }
+
+
+
 
     @Transactional
     public User getUserById(Long id) {

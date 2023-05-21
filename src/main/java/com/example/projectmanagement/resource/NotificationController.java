@@ -1,13 +1,10 @@
 package com.example.projectmanagement.resource;
 
 import com.example.projectmanagement.Domaine.Notification;
-import com.example.projectmanagement.Reposirtory.NotificationRepository;
 import com.example.projectmanagement.Service.WebSocketHandler;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

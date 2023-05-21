@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task,Long> {
     Optional<Task> findById(Long id);
     List<Task> findByUser(User user);
-    List<Task> findByUserIsNull();
+    List<Task> findByManager(User user);
     List<Task> findByUserId(Long userId);
 
     @Query("SELECT t FROM Task t WHERE t.activity.id = ?1 AND t.activity.project.id = ?2 AND t.activity.project.projectManager.id = ?3")
