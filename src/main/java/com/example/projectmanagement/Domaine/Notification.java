@@ -27,6 +27,4 @@ public class Notification implements Serializable {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User sendTo;
-
-
 }

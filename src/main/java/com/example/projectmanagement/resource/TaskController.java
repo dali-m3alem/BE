@@ -6,6 +6,8 @@ import com.example.projectmanagement.Domaine.User;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Service.TaskImplServ;
 import com.example.projectmanagement.Service.TaskServ;
+import com.example.projectmanagement.config.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ public class TaskController {
     private TaskImplServ taskservice;
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private JwtService jwtService;
 
 
 
@@ -33,12 +37,26 @@ public class TaskController {
         return taskservice.getTasksByManagerId(managerId);
     }
 
-    @PostMapping("/CreateTask")
-    public ResponseEntity<Task> createTask(@RequestBody TaskDto taskDto) {
-        Task newTask = taskservice.createTask(taskDto);
-        return ResponseEntity.ok(newTask);
-    }
+    @PostMapping("/create")
+    public ResponseEntity<?> createTask(@RequestBody TaskDto taskDto, HttpServletRequest request) {
+        try {
+            final String authHeader = request.getHeader("Authorization");
+            String jwt = authHeader.substring(7);
+            Long userId = Long.valueOf(jwtService.extractId(jwt));
+            List<String> roles = jwtService.extractRoles(jwt);
+            System.out.println(roles);
 
+            if (roles.contains("manager")) {
+                taskDto.setManager(userId);
+                Task newTask = taskservice.createTask(taskDto);
+                return ResponseEntity.ok(newTask);
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Only managers can create tasks.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody TaskDto taskDto) {

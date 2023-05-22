@@ -59,17 +59,16 @@ public class TaskImplServ implements TaskServ{
         Task task = new Task();
         task.setTitle(taskDto.getTitle());
         task.setDescription(taskDto.getDescription());
-        task.setCreatedBy(taskDto.getCreatedBy());
         task.setDueDate(taskDto.getDueDate());
         task.setUser(user);
         task.setActivity(activity);
         task.setStatus("todo");
         task.setManager(id);
         task = taskRepository.save(task);
+        String nameTask=taskDto.getTitle();
         try {
-            Notification notification = webSocketHandler.createNotification("A new task has been created to you", user);
+            Notification notification = webSocketHandler.createNotification("A new task"+nameTask+" has been created to you", user);
             webSocketHandler.sendNotification(notification);
-            logger.info("Notification sent for task: {}", task.getTitle());
 
         } catch (IOException e) {
             // Handle the exception
@@ -77,7 +76,6 @@ public class TaskImplServ implements TaskServ{
 
         return task;
     }
-
 
 
 

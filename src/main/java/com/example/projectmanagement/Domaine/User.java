@@ -48,8 +48,8 @@ public class User implements Serializable,UserDetails{
     @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
-    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
     private List<Task> tasks;
 
     @ManyToMany(fetch = FetchType.EAGER)

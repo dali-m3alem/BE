@@ -27,7 +27,7 @@ public class WebSocketIntegrationTest {
     public void testWebSocketChat() throws InterruptedException, ExecutionException {
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(
                 Arrays.asList(new WebSocketTransport(new StandardWebSocketClient()))));
-        StompSession stompSession = stompClient.connect("ws://localhost:8080/websocket", new StompSessionHandlerAdapter() {}).get();
+        StompSession stompSession = stompClient.connect("ws://localhost:8080/websocket/info", new StompSessionHandlerAdapter() {}).get();
 
         // Subscribe to a topic to receive messages
         stompSession.subscribe("/topic/chat", new StompFrameHandler() {

@@ -224,6 +224,12 @@ public class userImpService implements UserSer{
             task.setUser(null);
             taskRepository.save(task);
         }
+
+        List<Task> userTask = taskRepository.findByManager(user);
+        for (Task task : userTask) {
+            task.setManager(null);
+            taskRepository.save(task);
+        }
         // Remove the admin from any project they are assigned to
         List<Project> adminProject= projectRepository.findByAdmin(user);
         for (Project project: adminProject){

@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task,Long> {
     Optional<Task> findById(Long id);
     List<Task> findByUser(User user);
+    List<Task> findByManager(User user);
     List<Task> findByUserIsNull();
     List<Task> findByUserId(Long userId);
 
