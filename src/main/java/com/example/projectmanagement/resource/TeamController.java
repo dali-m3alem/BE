@@ -71,4 +71,11 @@ public class TeamController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
+    @GetMapping("/{teamId}/members")
+    public ResponseEntity<List<String>> getAllTeamMembers(@PathVariable Long teamId) {
+        List<String> teamMembers = teamService.getAllTeamMembers(teamId);
+        return ResponseEntity.ok(teamMembers);
+    }
+
 }
+

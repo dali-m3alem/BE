@@ -10,7 +10,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Member;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class ActivityImplServ implements ActitvtyServ{
     private final ProjectRepository projectRepository;
 
     private final TeamRepository teamRepository;
+    private final TeamServ teamServ;
 
 
     @Override
@@ -80,4 +84,20 @@ public class ActivityImplServ implements ActitvtyServ{
     public void deleteActivity(Long id) {
         activityRepository.deleteById(id);
     }
+
+    @Override
+    public List<String> getAllTeamMembersByActivityId(Long activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new NoSuchElementException("Activity not found"));
+
+        Team team = activity.getTeam();
+        if (team == null) {
+            throw new IllegalStateException("No team assigned to the activity");
+        }
+
+        return team.getMembers().stream()
+                .map(User::getEmail)
+                .collect(Collectors.toList());
+    }
+
 }

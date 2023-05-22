@@ -58,8 +58,7 @@ public class User implements Serializable,UserDetails{
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "auth_id"))
     private Set<Authorisation> roles = new HashSet<>();
-    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER)
-    private Set<Team> teams = new HashSet<>();
+
 
     @PrePersist
     protected void onCreate() {

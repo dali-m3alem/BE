@@ -14,6 +14,8 @@ public interface TeamServ {
     public void deleteTeam(Long idTeam);
     public Team findById(Long id);
    // public List<Member> getAllByTeamId(Long id);
+   public List<String> getAllTeamMembers(Long teamId);
+
 
 
 }

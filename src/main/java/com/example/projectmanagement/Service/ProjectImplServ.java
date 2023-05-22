@@ -211,7 +211,9 @@ public class ProjectImplServ implements ProjectServ{
             // Handle the exception
         }
     }
-
+    public void saveProject(Project project) {
+        projectRepository.save(project);
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(Project.class);
 }

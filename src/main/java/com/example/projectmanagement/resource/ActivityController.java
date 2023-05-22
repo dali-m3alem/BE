@@ -31,7 +31,11 @@ public class ActivityController {
     @GetMapping("/getActivityById/{id}")
     public Activity getActivityById(@PathVariable Long id) {
         return  activityService.getActivityById(id);
-
+    }
+    @GetMapping("/{activityId}/team-members")
+    public ResponseEntity<List<String>> getTeamMembersByActivityId(@PathVariable Long activityId) {
+        List<String> teamMembers = activityService.getAllTeamMembersByActivityId(activityId);
+        return ResponseEntity.ok(teamMembers);
     }
 
     @PostMapping("/createActivity")

@@ -1,6 +1,5 @@
 package com.example.projectmanagement.Service;
 
-import com.example.projectmanagement.DTO.TaskDto;
 import com.example.projectmanagement.DTO.TeamDTO;
 import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
@@ -8,13 +7,12 @@ import com.example.projectmanagement.Reposirtory.TeamRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.lang.reflect.Member;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class TeamImplServ implements TeamServ{
@@ -77,5 +75,19 @@ public class TeamImplServ implements TeamServ{
         return teamRepository.findById(id).orElseThrow(()
                 -> new EntityNotFoundException("Team not found"));
     }
+        @Override
+        public List<String> getAllTeamMembers(Long teamId) {
+            Team team = teamRepository.findById(teamId)
+                    .orElseThrow(() -> new NoSuchElementException("Team not found"));
 
-}
+            return team.getMembers().stream()
+                    .map(User::getEmail)
+                    .collect(Collectors.toList());
+        }
+     /*   public Team getTeamByActivityId(Long activityId){
+            return teamRepository.findByActivityId(activityId)
+                    .orElseThrow(() -> new NoSuchElementException("Team not found for activity ID: " + activityId));
+        }*/
+    }
+
+

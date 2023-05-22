@@ -2,6 +2,7 @@ package com.example.projectmanagement.Reposirtory;
 
 
 import com.example.projectmanagement.Domaine.Activity;
+import com.example.projectmanagement.Domaine.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     @Override
     Optional<Activity> findById(Long Long);
     List<Activity> findByTeamId(Long TeamId);
+
 
 
 }
