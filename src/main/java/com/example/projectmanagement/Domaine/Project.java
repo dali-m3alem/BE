@@ -26,13 +26,13 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Project implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "usr_seq")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "usr_seq")
     private Long id;
     private String projectName;
     private String descriptionP;
-    private String objectiveP ;
+    private String objectiveP;
     private String durationP;
-    private Date deadlineP ;
+    private Date deadlineP;
     private String status;
     private Long budget;
 
@@ -44,11 +44,11 @@ public class Project implements Serializable {
     private User admin;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "team_leader_id",referencedColumnName = "id")
+    @JoinColumn(name = "team_leader_id", referencedColumnName = "id")
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JsonBackReference
     private User projectManager;
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Activity> activity = new ArrayList<>();
 }

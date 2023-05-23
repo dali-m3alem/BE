@@ -47,7 +47,15 @@ public class ProjectController {
         }
     }
 
-
+    @GetMapping("/activityOfProject/{id}")
+    public ResponseEntity<Project> ActivitiesOfProject(@PathVariable Long id) {
+        Project project = projectService.ActivitiesOfProject(id);
+        if (project != null) {
+            return ResponseEntity.ok(project);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @GetMapping("/getProjectById/{id}")
     public Project getProjectById(@PathVariable Long id) {

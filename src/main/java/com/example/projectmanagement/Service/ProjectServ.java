@@ -16,4 +16,6 @@ public interface ProjectServ {
     public Project updateProject(ProjectRequest projectRequest);
     public void deleteProject(Long id);
     public Project createProject(ProjectRequest projectRequest) throws AccessDeniedException;
-    public List<ProjectDto> getAllProjectsByManagerId(Long managerId);}
+    public List<ProjectDto> getAllProjectsByManagerId(Long managerId);
+    public Project ActivitiesOfProject(Long id);
+}

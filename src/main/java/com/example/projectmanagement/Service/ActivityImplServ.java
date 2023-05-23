@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ActivityImplServ implements ActitvtyServ{
+public class ActivityImplServ implements ActitvtyServ {
     private final ActivityRepository activityRepository;
 
     private final ProjectRepository projectRepository;
 
     private final TeamRepository teamRepository;
-    private final TeamServ teamServ;
+    private final TaskServ taskServ;
 
 
     @Override
@@ -34,15 +34,17 @@ public class ActivityImplServ implements ActitvtyServ{
     public Long getActivityManagerId(Long projectId) {
         return projectRepository.findActivityManagerIdByProjectId(projectId);
     }
+
     public List<Activity> getActivityByProjectId(Long id) {
         return activityRepository.findByProjectId(id);
     }
+
     public Activity getActivityById(Long id) {
-        return activityRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Task not found"));
+        return activityRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Activity not found"));
     }
 
-        public Activity createActivity(ActivityDto activityDto) {
-        Project project= projectRepository.findById(activityDto.getProjectId()).orElseThrow(()
+    public Activity createActivity(ActivityDto activityDto) {
+        Project project = projectRepository.findById(activityDto.getProjectId()).orElseThrow(()
                 -> new IllegalArgumentException("Invalid project id"));
         Team team = teamRepository.findById(activityDto.getTeamId()).orElseThrow(()
                 -> new IllegalArgumentException("Invalid team id"));
@@ -52,6 +54,7 @@ public class ActivityImplServ implements ActitvtyServ{
         activity.setObjectiveA(activityDto.getObjectiveA());
         activity.setDurationA(activityDto.getDurationA());
         activity.setDeadlineA(activityDto.getDeadlineA());
+        activity.setStatus("not started");
         activity.setProject(project);
         activity.setTeam(team);
 
@@ -81,6 +84,7 @@ public class ActivityImplServ implements ActitvtyServ{
 
         return activityRepository.save(activity);
     }
+
     public void deleteActivity(Long id) {
         activityRepository.deleteById(id);
     }
@@ -99,5 +103,21 @@ public class ActivityImplServ implements ActitvtyServ{
                 .map(User::getEmail)
                 .collect(Collectors.toList());
     }
-
+    public Activity taskOfActivity(Long activityId) {
+        Activity activity = getActivityById(activityId);
+        List<Task> tasks = taskServ.getTaskByActivityId(activityId);
+        boolean allTasksDone = true;
+        for (Task task : tasks) {
+            if (!task.getStatus().equals("DONE")) {
+                allTasksDone = false;
+                break;
+            }
+        }
+        if (allTasksDone == true) {
+            activity.setStatus("DONE");
+        }
+        return activityRepository.save(activity);
+    }
 }
+
+

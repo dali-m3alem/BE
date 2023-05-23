@@ -3,6 +3,7 @@ package com.example.projectmanagement.resource;
 import com.example.projectmanagement.DTO.TaskDto;
 import com.example.projectmanagement.Domaine.Task;
 import com.example.projectmanagement.Domaine.User;
+import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Service.TaskImplServ;
 import com.example.projectmanagement.Service.TaskServ;
@@ -25,6 +26,8 @@ public class TaskController {
     private TaskRepository taskRepository;
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private ProjectRepository projectRepository;
 
 
 
@@ -36,7 +39,10 @@ public class TaskController {
     public List<Task> getTasksByManagerId2(@RequestParam Long managerId) {
         return taskservice.getTasksByManagerId(managerId);
     }
-
+    @GetMapping("/getTasksActivity")
+    public List<Task> getTasksByActivityId(@RequestParam Long activityId){
+        return taskservice.getTaskByActivityId(activityId);
+    }
     @PostMapping("/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDto taskDto, HttpServletRequest request) {
         try {
@@ -86,9 +92,6 @@ public class TaskController {
     public List<Task> getTasksByUser(@RequestParam(name = "user_id") Long userId) {
         return taskRepository.findByUserId(userId);
     }
-
-
-
 
     
 }

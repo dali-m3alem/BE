@@ -28,7 +28,7 @@ public class Activity implements Serializable {
     private String  objectiveA;
     private String durationA;
     private Date deadlineA ;
-
+    private String status;
     @ManyToOne
     private Project project;
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL,fetch = FetchType.EAGER)

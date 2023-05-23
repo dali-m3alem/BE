@@ -3,6 +3,7 @@ package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.TaskDto;
 import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
+import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -29,6 +30,7 @@ public class TaskImplServ implements TaskServ{
     private final UserRepository Repository;
     private final ActivityRepository activityRepository;
     private final WebSocketHandler webSocketHandler;
+    private final ProjectRepository projectRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -43,6 +45,12 @@ public class TaskImplServ implements TaskServ{
         String query = "SELECT t FROM Task t LEFT JOIN FETCH t.activity LEFT JOIN FETCH t.manager u WHERE u.id = :managerId\n";
         TypedQuery<Task> typedQuery = entityManager.createQuery(query, Task.class);
         typedQuery.setParameter("managerId", managerId);
+        return typedQuery.getResultList();
+    }
+    public List<Task> getTaskByActivityId(Long activityId){
+        String query = "SELECT t FROM Task t LEFT JOIN FETCH t.activity LEFT JOIN FETCH t.activity a WHERE a.id=:activityId\n";
+        TypedQuery<Task> typedQuery=entityManager.createQuery(query,Task.class);
+        typedQuery.setParameter("activityId",activityId);
         return typedQuery.getResultList();
     }
 

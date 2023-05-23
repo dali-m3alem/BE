@@ -14,5 +14,6 @@ public interface TaskServ {
     public void deleteTask(Long id);
     public List<Task> getAllTasks();
     public List<Task> getAllTasksOfUser(String username);
+    public List<Task> getTaskByActivityId(Long activityId);
 
 }

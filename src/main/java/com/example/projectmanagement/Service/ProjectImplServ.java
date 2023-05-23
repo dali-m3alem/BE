@@ -1,6 +1,7 @@
 package com.example.projectmanagement.Service;
 import com.example.projectmanagement.DTO.*;
 import com.example.projectmanagement.Domaine.*;
+import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 import org.slf4j.Logger;
@@ -32,7 +33,8 @@ public class ProjectImplServ implements ProjectServ{
     private final UserRepository userRepository;
     private final EntityManagerFactory entityManagerFactory;
     private final WebSocketHandler webSocketHandler;
-
+    private final ActivityRepository activityRepository;
+    private final ActitvtyServ actitvtyServ;
 
     public List<Project> getAllProjects() {
 
@@ -62,6 +64,7 @@ public class ProjectImplServ implements ProjectServ{
             return projectDto;
         }).collect(Collectors.toList());
     }
+
     public List<ProjectDto> getAllProjectsByAdminId(Long adminId) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
@@ -211,9 +214,25 @@ public class ProjectImplServ implements ProjectServ{
             // Handle the exception
         }
     }
-    public void saveProject(Project project) {
-        projectRepository.save(project);
+    public Project ActivitiesOfProject(Long id){
+        Project project= getProjectById(id);
+        List<Activity> activities = actitvtyServ.getActivityByProjectId(id);
+        boolean allActivitiesDone = true;
+        for (Activity activity:activities){
+            if(!activity.getStatus().equals("DONE")){
+                allActivitiesDone = false;
+                break;
+            }
+        }
+        if (allActivitiesDone==true){
+            project.setStatus("DONE");
+        }
+        return projectRepository.save(project);
     }
+  /*  public void saveProject(Project project) {
+        projectRepository.save(project);
+    }*/
+
 
     private static final Logger logger = LoggerFactory.getLogger(Project.class);
 }

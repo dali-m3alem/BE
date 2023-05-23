@@ -2,6 +2,7 @@ package com.example.projectmanagement.Reposirtory;
 
 
 import com.example.projectmanagement.Domaine.Project;
+import com.example.projectmanagement.Domaine.Task;
 import com.example.projectmanagement.Domaine.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -2,6 +2,7 @@ package com.example.projectmanagement.resource;
 
 import com.example.projectmanagement.DTO.ActivityDto;
 import com.example.projectmanagement.Domaine.Activity;
+import com.example.projectmanagement.Domaine.Project;
 import com.example.projectmanagement.Service.ActivityImplServ;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
@@ -67,6 +68,16 @@ public class ActivityController {
     {
      activityService.deleteActivity(idUser);
     }
+    @GetMapping("/taskOfActivity/{id}")
+    public ResponseEntity<Activity> taskOfActivity(@PathVariable Long id) {
+        Activity activity = activityService.taskOfActivity(id);
+        if (activity != null) {
+            return ResponseEntity.ok(activity);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
 
 }
