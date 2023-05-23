@@ -48,10 +48,10 @@ public class ProjectController {
     }
 
     @GetMapping("/ChangeProjectStatus/{id}")
-    public ResponseEntity<Project> ChangeProjectStatus(@PathVariable Long id) {
-        Project project = projectService.ChangeProjectStatus(id);
-        if (project != null) {
-            return ResponseEntity.ok(project);
+    public ResponseEntity<String> changeProjectStatus(@PathVariable Long id) {
+        String status = projectService.changeProjectStatus(id);
+        if (status != null) {
+            return ResponseEntity.ok(status);
         } else {
             return ResponseEntity.notFound().build();
         }

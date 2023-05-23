@@ -214,21 +214,26 @@ public class ProjectImplServ implements ProjectServ{
             // Handle the exception
         }
     }
-    public Project ChangeProjectStatus(Long id){
-        Project project= getProjectById(id);
+    public String changeProjectStatus(Long id) {
+        Project project = getProjectById(id);
         List<Activity> activities = actitvtyServ.getActivityByProjectId(id);
         boolean allActivitiesDone = true;
-        for (Activity activity:activities){
-            if(!activity.getStatus().equals("DONE")){
+
+        for (Activity activity : activities) {
+            if (!activity.getStatus().equals("DONE")) {
                 allActivitiesDone = false;
                 break;
             }
         }
-        if (allActivitiesDone==true){
+
+        if (allActivitiesDone) {
             project.setStatus("DONE");
         }
-        return projectRepository.save(project);
+
+        projectRepository.save(project);
+        return project.getStatus();
     }
+
   /*  public void saveProject(Project project) {
         projectRepository.save(project);
     }*/
