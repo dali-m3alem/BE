@@ -28,8 +28,12 @@ public class ActivityController {
 
 
     @GetMapping("/getActivityByProjectId/{id}")
-    public List<Activity> getActivityByProjectId(@PathVariable Long id) {
-        return activityService.getActivityByProjectId(id);
+    public List<Activity> getActivityByProjectId(@PathVariable Long id, HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        String jwt = authHeader.substring(7);
+        System.out.println(jwt);
+        Long managerId = Long.valueOf(jwtService.extractId(jwt));
+        return activityService.getActivityByProjectId(id,managerId);
     }
 
     @GetMapping("/getActivityById/{id}")
@@ -67,5 +71,11 @@ public class ActivityController {
     {
      activityService.deleteActivity(idUser);
     }
+    @GetMapping("/{activityId}/team-members")
+    public ResponseEntity<List<String>> getTeamMembersByActivityId(@PathVariable Long activityId) {
+        List<String> teamMembers = activityService.getAllTeamMembersByActivityId(activityId);
+        return ResponseEntity.ok(teamMembers);
+    }
+
 
 }

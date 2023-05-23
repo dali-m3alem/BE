@@ -227,6 +227,12 @@ public class userImpService implements UserSer{
             task.setUser(null);
             taskRepository.save(task);
         }
+
+        List<Task> userTask = taskRepository.findByManager(user);
+        for (Task task : userTask) {
+            task.setManager(null);
+            taskRepository.save(task);
+        }
         // Remove the admin from any project they are assigned to
         List<Project> adminProject= projectRepository.findByAdmin(user);
         for (Project project: adminProject){
@@ -239,11 +245,7 @@ public class userImpService implements UserSer{
             project.setProjectManager(null);
             projectRepository.save(project);
         }
-        List<Task> userTask = taskRepository.findByManager(user);
-        for (Task task : userTask) {
-            task.setManager(null);
-            taskRepository.save(task);
-        }
+
         // Remove the user from any teams they belong to
         List<Team> teams = teamRepository.findByMembersContaining(user);
         for (Team team : teams) {
@@ -256,9 +258,6 @@ public class userImpService implements UserSer{
         repository.delete(user);
     }
 
-
-
-
     @Transactional
     public User getUserById(Long id) {
         User user = repository.findById(id)
@@ -267,6 +266,8 @@ public class userImpService implements UserSer{
         Hibernate.initialize(user.getRoles());
         return user;
     }
+
+
     public List<User> getUserWSUN(String ch) {
         // TODO Auto-generated method stub
         return repository.listUsers(ch);
@@ -333,8 +334,8 @@ public class userImpService implements UserSer{
         }
         return emails;
     }
-    public List<User> findMembersByTeamId(Long userId) {
-            Optional<User> userOptional = repository.findById(userId);
+   /* public List<User> findMembersByTeamId(Long userId) {
+            Optional<User> Team = repository.findById(userId);
             if (userOptional.isPresent()) {
                 User user = userOptional.get();
                 return new ArrayList<>(user.getTeams().stream()
@@ -342,7 +343,7 @@ public class userImpService implements UserSer{
                         .collect(Collectors.toSet()));
             }
             return Collections.emptyList();
-        }
+        }*/
     public List<User> findUsersByIds(List<Long> userIds) {
         return repository.findAllById(userIds);
     }

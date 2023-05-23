@@ -30,7 +30,7 @@ public class Activity implements Serializable {
 
     @ManyToOne
     private Project project;
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Task> task = new ArrayList<>();
 

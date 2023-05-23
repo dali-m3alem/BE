@@ -53,9 +53,10 @@ public class User implements Serializable,UserDetails{
     @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
-    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
     private List<Task> tasks;
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -63,8 +64,7 @@ public class User implements Serializable,UserDetails{
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "auth_id"))
     private Set<Authorisation> roles = new HashSet<>();
-    @ManyToMany(mappedBy = "members", fetch = FetchType.LAZY)
-    private Set<Team> teams = new HashSet<>();
+
 
     @PrePersist
     protected void onCreate() {

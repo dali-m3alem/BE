@@ -52,7 +52,8 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setObjectiveP(project.getObjectiveP());
             projectDto.setAdmin(project.getAdmin().getEmail());
             projectDto.setDeadlineP(project.getDeadlineP());
-            projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
+            projectDto.setProjectManagerEmail(project.getProjectManager());
+            projectDto.setActivity((List<Activity>) project.getActivity());
             projectDto.setStatus(project.getStatus());
             projectDto.setBudget(project.getBudget());
 
@@ -72,8 +73,10 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setObjectiveP(project.getObjectiveP());
             projectDto.setAdminId(project.getAdmin().getId());
             projectDto.setDeadlineP(project.getDeadlineP());
+            projectDto.setActivity( project.getActivity());
+
             if (project.getProjectManager() != null) {
-                projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
+                projectDto.setProjectManagerEmail(project.getProjectManager());
             } else {
                 projectDto.setProjectManagerEmail(null); // or any other default value
             }

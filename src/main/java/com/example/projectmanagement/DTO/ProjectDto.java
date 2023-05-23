@@ -1,5 +1,7 @@
 package com.example.projectmanagement.DTO;
 
+import com.example.projectmanagement.Domaine.Activity;
+import com.example.projectmanagement.Domaine.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +22,10 @@ public class ProjectDto {
     private String durationP;
     private Date deadlineP;
     private Long adminId;
-    private String projectManagerEmail;
+    private User projectManagerEmail;
+    private List<Activity> activity;
+
+
     private String status;
     private Long budget;
     private String admin;

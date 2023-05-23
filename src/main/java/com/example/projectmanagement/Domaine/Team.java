@@ -1,6 +1,7 @@
 package com.example.projectmanagement.Domaine;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,20 +29,18 @@ import java.util.Set;
         private String teamDesc;
         @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
         @Column(name = "_activities")
-        private Set<Activity> activities = new HashSet<>();
+        @JsonIgnore
+        private List<Activity> activities = new ArrayList<>();
 
-        @ManyToMany(fetch = FetchType.LAZY)
+        @ManyToMany(fetch = FetchType.EAGER)
         @JoinTable(
                 name = "team_members",
                 joinColumns = @JoinColumn(name = "team_id"),
                 inverseJoinColumns = @JoinColumn(name = "user_id"))
-        private Set<User> members = new HashSet<>();
-
+        private List<User> members = new ArrayList<>();
 
         public void setMembers(List<User> members) {
-            this.members = new HashSet<>(members);
-        }
-
+            this.members = new ArrayList<>(members);}
         public void removeMember(User user) {
             members.remove(user);
         }

@@ -31,11 +31,11 @@ public class Usercontroller {
     private final JwtService serviceJWT;
 
 
-
+/*
     @GetMapping("/{teamId}/members")
     public List<User> getTeamMembers(@PathVariable Long teamId) {
         return service.findMembersByTeamId(teamId);
-    }
+    }*/
     @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ResponseAuth> registerUser(@Valid @ModelAttribute RequestRegister request) throws IOException {
         try {
@@ -134,7 +134,6 @@ public class Usercontroller {
     @DeleteMapping("/deleteUser")
     public ResponseEntity<?> deleteUser(@RequestParam Long id) {
         service.deleteUser(id);
-
         return ResponseEntity.ok().build();
     }
 

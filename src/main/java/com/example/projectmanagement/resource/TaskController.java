@@ -38,7 +38,7 @@ public class TaskController {
             String jwt = authHeader.substring(7);
             System.out.println(jwt);
             Long managerId = Long.valueOf(jwtService.extractId(jwt));
-            return ResponseEntity.status(HttpStatus.OK).body(taskservice.getTasksByActivityAndProjectAndManager(activityId, projectId, managerId));
+            return ResponseEntity.status(HttpStatus.OK).body(taskservice.getTasksByActivityAndProjectAndManager(activityId, projectId,managerId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }

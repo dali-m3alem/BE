@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 public class ActivityImplServ implements ActitvtyServ{
@@ -33,14 +35,13 @@ public class ActivityImplServ implements ActitvtyServ{
 
 
 
-    /*   public List<Activity> getActivityByProjectId(Long id, Long managerId) {
+       public List<Activity> getActivityByProjectId(Long id, Long managerId) {
        return activityRepository
-               .getActivityDetails(id, managerId);
-   }*/
-     public List<Activity> getActivityByProjectId(Long id) {
+               .getActivityDetails(id, managerId);}
+    /* public List<Activity> getActivityByProjectId(Long id) {
          return activityRepository.findByProjectId(id);
      }
-
+*/
     public Activity getActivityById(Long id) {
         return activityRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Task not found"));
     }
@@ -92,5 +93,19 @@ public class ActivityImplServ implements ActitvtyServ{
 
     public void deleteActivity(Long id) {
         activityRepository.deleteById(id);
+    }
+    @Override
+    public List<String> getAllTeamMembersByActivityId(Long activityId) {
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new NoSuchElementException("Activity not found"));
+
+        Team team = activity.getTeam();
+        if (team == null) {
+            throw new IllegalStateException("No team assigned to the activity");
+        }
+
+        return team.getMembers().stream()
+                .map(User::getEmail)
+                .collect(Collectors.toList());
     }
 }
