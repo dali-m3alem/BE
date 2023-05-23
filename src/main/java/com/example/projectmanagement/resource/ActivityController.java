@@ -68,9 +68,9 @@ public class ActivityController {
     {
      activityService.deleteActivity(idUser);
     }
-    @GetMapping("/taskOfActivity/{id}")
-    public ResponseEntity<Activity> taskOfActivity(@PathVariable Long id) {
-        Activity activity = activityService.taskOfActivity(id);
+    @GetMapping("/ChangeActivityStatus/{id}")
+    public ResponseEntity<Activity> ChangeActivityStatus(@PathVariable Long id) {
+        Activity activity = activityService.ChangeActivityStatus(id);
         if (activity != null) {
             return ResponseEntity.ok(activity);
         } else {

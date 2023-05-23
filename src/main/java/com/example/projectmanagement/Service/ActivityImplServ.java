@@ -103,7 +103,7 @@ public class ActivityImplServ implements ActitvtyServ {
                 .map(User::getEmail)
                 .collect(Collectors.toList());
     }
-    public Activity taskOfActivity(Long activityId) {
+    public Activity ChangeActivityStatus(Long activityId) {
         Activity activity = getActivityById(activityId);
         List<Task> tasks = taskServ.getTaskByActivityId(activityId);
         boolean allTasksDone = true;

@@ -214,7 +214,7 @@ public class ProjectImplServ implements ProjectServ{
             // Handle the exception
         }
     }
-    public Project ActivitiesOfProject(Long id){
+    public Project ChangeProjectStatus(Long id){
         Project project= getProjectById(id);
         List<Activity> activities = actitvtyServ.getActivityByProjectId(id);
         boolean allActivitiesDone = true;
