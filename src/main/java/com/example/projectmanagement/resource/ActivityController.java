@@ -24,7 +24,7 @@ public class ActivityController {
         public List<Activity> getActivityByProjectId(@PathVariable Long id) {
         return activityService.getActivityByProjectId(id);
     }
-    @GetMapping("/projects/{projectId}/activityManagerId")
+    @GetMapping("/activityManagerId/{projectId}/activityManagerId")
     public ResponseEntity<Long> getActivityManagerId(@PathVariable Long projectId) {
         Long activityManagerId = activityService.getActivityManagerId(projectId);
         return ResponseEntity.ok(activityManagerId);

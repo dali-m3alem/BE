@@ -58,7 +58,7 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setDurationP(project.getDurationP());
             projectDto.setDeadlineP(project.getDeadlineP());
             projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
-            projectDto.setStatus(project.getStatus());
+            projectDto.setStatus(changeProjectStatus(project.getId()));
             projectDto.setBudget(project.getBudget());
 
             return projectDto;
@@ -79,7 +79,7 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setDurationP(project.getDurationP());
             projectDto.setDeadlineP(project.getDeadlineP());
             projectDto.setProjectManagerEmail(project.getProjectManager().getEmail());
-            projectDto.setStatus(project.getStatus());
+            projectDto.setStatus(changeProjectStatus(project.getId()));
             projectDto.setBudget(project.getBudget());
 
             return projectDto;

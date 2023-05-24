@@ -37,13 +37,13 @@ public class Project implements Serializable {
     private Long budget;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "admin_id", referencedColumnName = "id")
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JsonBackReference
     private User admin;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_leader_id", referencedColumnName = "id")
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     @JsonBackReference
