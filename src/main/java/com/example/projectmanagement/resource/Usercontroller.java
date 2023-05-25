@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 
 
@@ -166,6 +167,15 @@ public class Usercontroller {
         String roleName = requestParams.get("roleName");
         service.addRoleToUser(username, roleName);
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/tasksUSERpercent")
+    public ResponseEntity<String> calculateTaskPercentage() {
+        double taskPercentage = service.calculateTaskPercentage();
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String formattedTaskPercentage = decimalFormat.format(taskPercentage) + "%";
+
+        return ResponseEntity.ok(formattedTaskPercentage);
     }
 
 }

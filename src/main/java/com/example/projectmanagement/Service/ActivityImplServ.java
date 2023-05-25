@@ -6,7 +6,10 @@ import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.TeamRepository;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +24,11 @@ public class ActivityImplServ implements ActitvtyServ {
     private final ActivityRepository activityRepository;
 
     private final ProjectRepository projectRepository;
-
+    private final EntityManagerFactory entityManagerFactory;
     private final TeamRepository teamRepository;
     private final TaskServ taskServ;
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     @Override
@@ -88,7 +93,6 @@ public class ActivityImplServ implements ActitvtyServ {
     public void deleteActivity(Long id) {
         activityRepository.deleteById(id);
     }
-
     @Override
     public List<String> getAllTeamMembersByActivityId(Long activityId) {
         Activity activity = activityRepository.findById(activityId)
@@ -98,7 +102,6 @@ public class ActivityImplServ implements ActitvtyServ {
         if (team == null) {
             throw new IllegalStateException("No team assigned to the activity");
         }
-
         return team.getMembers().stream()
                 .map(User::getEmail)
                 .collect(Collectors.toList());
@@ -119,6 +122,26 @@ public class ActivityImplServ implements ActitvtyServ {
         return activity.getStatus();
 
     }
+    //STATISTIC OF ACTIVITIES
+    public Long countActivity() {
+       return  activityRepository.count();
+    }
+    public Long countActivitiesByStatus(String status) {
+        Query query = createCountQueryByStatus(status);
+        Long count = (Long) query.getSingleResult();
+        return count;
+    }
+    private Query createCountQueryByStatus(String status) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Activity> root = query.from(Activity.class);
+
+        query.select(cb.count(root));
+        query.where(cb.equal(root.get("status"), status));
+
+        return entityManager.createQuery(query);
+    }
+
 }
 
 

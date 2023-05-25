@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,10 +85,7 @@ public class TeamImplServ implements TeamServ{
                     .map(User::getEmail)
                     .collect(Collectors.toList());
         }
-     /*   public Team getTeamByActivityId(Long activityId){
-            return teamRepository.findByActivityId(activityId)
-                    .orElseThrow(() -> new NoSuchElementException("Team not found for activity ID: " + activityId));
-        }*/
-    }
+
+}
 
 

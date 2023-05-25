@@ -17,4 +17,6 @@ public interface ActitvtyServ {
     public Activity getActivityById(Long id);
     public List<String> getAllTeamMembersByActivityId(Long activityId);
     public String changeActivityStatus(Long activityId);
+    public Long countActivity();
+    public Long countActivitiesByStatus(String status);
 }

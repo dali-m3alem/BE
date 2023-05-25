@@ -27,4 +27,7 @@ public interface UserSer {
     public void addRoleToUser(String email, String roleName);
     List<User> findUsersByIds(List<Long> userIds);
     public User findUserById(Long userId);
+    public Long countTotalUsers();
+    public Long countUsersWithTasks();
+    public double calculateTaskPercentage();
 }

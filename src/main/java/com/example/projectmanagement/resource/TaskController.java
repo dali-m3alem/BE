@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -92,6 +93,36 @@ public class TaskController {
     public List<Task> getTasksByUser(@RequestParam(name = "user_id") Long userId) {
         return taskRepository.findByUserId(userId);
     }
+    @PutMapping("/updateDD")
+    public ResponseEntity<Task> updateTask(@RequestBody Task task) {
+        Task updatedTask = taskservice.updateTaskDD(task);
+        return new ResponseEntity<>(updatedTask, HttpStatus.OK);
+    }
+    @GetMapping("/countTasks")
+    public ResponseEntity<Long> countTask() {
+        Long countTask = taskservice.countTask();
+        return ResponseEntity.ok(countTask);
+    }
+    @GetMapping("/taskCount/{status}")
+    public ResponseEntity<Long> countTasksByStatus(@PathVariable String status) {
+        Long count = taskservice.countTasksByStatus(status);
+        return ResponseEntity.ok(count);
+    }
+    @GetMapping("/TaskPercent/{state}")
+    public ResponseEntity<String> calculatePercentByState(@PathVariable String state) {
+        Long totalTasks = taskservice.countTask();
+        Long stateTasks = taskservice.countTasksByStatus(state);
 
-    
+        if (totalTasks == 0) {
+            return ResponseEntity.badRequest().body("No tasks found.");
+        }
+
+        double percent = (stateTasks.doubleValue() / totalTasks.doubleValue()) * 100.0;
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String formattedPercent = decimalFormat.format(percent) + "%";
+
+        return ResponseEntity.ok(formattedPercent);
+    }
+
 }

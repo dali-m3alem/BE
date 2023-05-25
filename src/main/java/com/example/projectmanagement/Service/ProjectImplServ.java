@@ -4,6 +4,9 @@ import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -86,11 +89,7 @@ public class ProjectImplServ implements ProjectServ{
         }).collect(Collectors.toList());
     }
     public Long countProjects() {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Query query = entityManager.createQuery("SELECT COUNT(p) FROM Project p");
-        Long count = (Long) query.getSingleResult();
-        entityManager.close();
-        return count;
+        return projectRepository.count();
     }
 
 
@@ -233,11 +232,22 @@ public class ProjectImplServ implements ProjectServ{
         projectRepository.save(project);
         return project.getStatus();
     }
+    //STATISTIC OF PROJECTS
+    public Long countProjectsByStatus(String status) {
+        Query query = createCountQueryByStatus(status);
+        Long count = (Long) query.getSingleResult();
+        return count;
+    }
+    private Query createCountQueryByStatus(String status) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Project> root = query.from(Project.class);
 
-  /*  public void saveProject(Project project) {
-        projectRepository.save(project);
-    }*/
+        query.select(cb.count(root));
+        query.where(cb.equal(root.get("status"), status));
 
+        return entityManager.createQuery(query);
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(Project.class);
 }

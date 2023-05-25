@@ -28,7 +28,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class userImpService implements UserSer{
+public class userImpService implements UserSer {
 
     private final UserRepository repository;
     private final JwtService serviceJWT;
@@ -48,7 +48,6 @@ public class userImpService implements UserSer{
     private TeamRepository teamRepository;
 
 
-
     public Long countUsers() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Query query = entityManager.createQuery("SELECT COUNT(p) FROM User p");
@@ -56,13 +55,15 @@ public class userImpService implements UserSer{
         entityManager.close();
         return count;
     }
+
     public List<User> getAllUsers() {
         List<User> users = repository.findAll();
-        if(users.isEmpty()){
+        if (users.isEmpty()) {
             throw new RuntimeException("No users found");
         }
         return users;
     }
+
     public User addUser(User user) {
         // TODO Auto-generated method stub
         return repository.save(user);
@@ -82,6 +83,7 @@ public class userImpService implements UserSer{
                 .token(jwtToken)
                 .build();
     }
+
     public void uploadProfilePicture(MultipartFile file, Long userId) {
         User user = repository.findById(userId).orElse(null);
         if (user != null) {
@@ -96,6 +98,7 @@ public class userImpService implements UserSer{
             throw new IllegalArgumentException("User not found");
         }
     }
+
     @Override
     public ResponseAuth registerUser(RequestRegister request) throws IOException {
         String roleName = request.getRoleName();
@@ -106,9 +109,9 @@ public class userImpService implements UserSer{
         // Vérifier si le fichier image est fourni
         byte[] profilePicture = null;
         if (request.getProfilePicture() != null) {
-                try {
-                    profilePicture = request.getProfilePicture().getBytes();
-                }catch (IOException e) {
+            try {
+                profilePicture = request.getProfilePicture().getBytes();
+            } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException("Failed to read profile picture file", e);
             }
@@ -142,12 +145,6 @@ public class userImpService implements UserSer{
     }
 
 
-
-
-
-
-
-
     public void createUserAndTask(User user, Task task) {
         if (user == null || task == null) {
             throw new IllegalArgumentException("User and task must not be null");
@@ -162,6 +159,7 @@ public class userImpService implements UserSer{
         task.setUser(savedUser);
         taskRepository.save(task);
     }
+
     @Override
     public User updateUserWP(User updatedUser) {
         User user = repository.findById(updatedUser.getId()).orElseThrow(EntityNotFoundException::new);
@@ -188,6 +186,7 @@ public class userImpService implements UserSer{
         user.setPassword(passwordEncoder.encode(newPassword));
         repository.save(user);
     }
+
     public class InvalidPasswordException extends RuntimeException {
         public InvalidPasswordException(String message) {
             super(message);
@@ -231,14 +230,14 @@ public class userImpService implements UserSer{
             taskRepository.save(task);
         }
         // Remove the admin from any project they are assigned to
-        List<Project> adminProject= projectRepository.findByAdmin(user);
-        for (Project project: adminProject){
+        List<Project> adminProject = projectRepository.findByAdmin(user);
+        for (Project project : adminProject) {
             project.setAdmin(null);
             projectRepository.save(project);
         }
         // Remove the manager from any project they are assigned to
-        List<Project> managerProject= projectRepository.findByProjectManager(user);
-        for (Project project: managerProject){
+        List<Project> managerProject = projectRepository.findByProjectManager(user);
+        for (Project project : managerProject) {
             project.setProjectManager(null);
             projectRepository.save(project);
         }
@@ -256,7 +255,6 @@ public class userImpService implements UserSer{
     }
 
 
-
     @Transactional
     public User getUserById(Long id) {
         User user = repository.findById(id)
@@ -265,10 +263,12 @@ public class userImpService implements UserSer{
         Hibernate.initialize(user.getRoles());
         return user;
     }
+
     public List<User> getUserWSUN(String ch) {
         // TODO Auto-generated method stub
         return repository.listUsers(ch);
     }
+
     public List<Task> findAllTasksByUserId(Long userId) {
         return repository.findAllTasksByUserId(userId);
     }
@@ -277,11 +277,12 @@ public class userImpService implements UserSer{
     public List<User> findAllWithoutTasks() {
         return repository.findAllWithoutTasks();
     }
+
     public void addRoleToUser(String email, String roleName) {
         User user = repository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         // Vérifier si le rôle existe
-       Authorisation role = repositoryAu.role(roleName);
+        Authorisation role = repositoryAu.role(roleName);
         user.getRoles().add(role);
         repository.save(user);
     }
@@ -305,19 +306,34 @@ public class userImpService implements UserSer{
         String token = UUID.randomUUID().toString();
         return token.replaceAll("-", "");
     }
+
     public List<User> findUsersByIds(List<Long> userIds) {
         return repository.findAllById(userIds);
     }
+
     public User findUserById(Long userId) {
         Optional<User> userOptional = repository.findById(userId);
         return userOptional.orElse(null);
     }
 
+    //STATISTICS OF USERS
+    public Long countTotalUsers() {
+        return repository.count();
+    }
 
+    public Long countUsersWithTasks() {
+        return repository.countUsersWithTasks();
+    }
+    public double calculateTaskPercentage() {
+        Long totalUsers = countTotalUsers();
+        Long usersWithTasks = countUsersWithTasks();
 
+        if (totalUsers == 0) {
+            return 0.0;
+        }
 
-
+        return (usersWithTasks.doubleValue() / totalUsers.doubleValue()) * 100.0;
+    }
 }
-
 
 

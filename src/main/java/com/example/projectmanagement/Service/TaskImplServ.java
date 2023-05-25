@@ -6,10 +6,10 @@ import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.ProjectRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +31,7 @@ public class TaskImplServ implements TaskServ{
     private final ActivityRepository activityRepository;
     private final WebSocketHandler webSocketHandler;
     private final ProjectRepository projectRepository;
+    private final EntityManagerFactory entityManagerFactory;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -176,8 +177,33 @@ public class TaskImplServ implements TaskServ{
         }
         return tasks;
     }*/
+  public Task updateTaskDD(Task task) {
+      Optional<Task> optionalTask = taskRepository.findById(task.getId());
+      if (optionalTask.isPresent()) {
+          Task updatedTask = optionalTask.get();
+          updatedTask.setStatus(task.getStatus());
+      }  return taskRepository.save(updateTaskDD(task));
+  }
+  //STATISTICS OF TASKS
+    public Long countTask() {
+        return taskRepository.count();
+    }
+    public Long countTasksByStatus(String status) {
+        Query query = createCountQueryByStatus(status);
+        Long count = (Long) query.getSingleResult();
+        return count;
+    }
+
+    private Query createCountQueryByStatus(String status) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Task> root = query.from(Task.class);
+
+        query.select(cb.count(root));
+        query.where(cb.equal(root.get("status"), status));
+
+        return entityManager.createQuery(query);
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(Project.class);
-
-
 }

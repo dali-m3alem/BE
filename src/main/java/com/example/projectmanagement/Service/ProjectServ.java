@@ -18,4 +18,5 @@ public interface ProjectServ {
     public Project createProject(ProjectRequest projectRequest) throws AccessDeniedException;
     public List<ProjectDto> getAllProjectsByManagerId(Long managerId);
     public String changeProjectStatus(Long id);
+    public Long countProjectsByStatus(String status);
 }

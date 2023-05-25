@@ -48,7 +48,7 @@ public class User implements Serializable,UserDetails{
     @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Task> tasks;
 

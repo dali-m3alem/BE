@@ -15,5 +15,8 @@ public interface TaskServ {
     public List<Task> getAllTasks();
     public List<Task> getAllTasksOfUser(String username);
     public List<Task> getTaskByActivityId(Long activityId);
+    public Task updateTaskDD(Task task);
+    public Long countTasksByStatus(String status);
+    public Long countTask();
 
 }

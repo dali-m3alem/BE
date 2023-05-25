@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public class ProjectController {
         List<ProjectDto> projects = projectService.getAllProjectsByManagerId(managerId);
         return ResponseEntity.ok(projects);
     }
-    @GetMapping("/count")
+    @GetMapping("/countProject")
     public ResponseEntity<Long> countProjects() {
         Long count = projectService.countProjects();
         return ResponseEntity.ok(count);
@@ -91,6 +92,27 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@RequestParam Long id) {
         projectService.deleteProject(id);
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/projectCount/{status}")
+    public ResponseEntity<Long> countTasksByStatus(@PathVariable String status) {
+        Long count = projectService.countProjectsByStatus(status);
+        return ResponseEntity.ok(count);
+    }
+    @GetMapping("/projectPercent/{state}")
+    public ResponseEntity<String> calculatePercentByState(@PathVariable String state) {
+        Long totalTasks = projectService.countProjects();
+        Long stateTasks = projectService.countProjectsByStatus(state);
+
+        if (totalTasks == 0) {
+            return ResponseEntity.badRequest().body("No tasks found.");
+        }
+
+        double percent = (stateTasks.doubleValue() / totalTasks.doubleValue()) * 100.0;
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String formattedPercent = decimalFormat.format(percent) + "%";
+
+        return ResponseEntity.ok(formattedPercent);
     }
 
 }

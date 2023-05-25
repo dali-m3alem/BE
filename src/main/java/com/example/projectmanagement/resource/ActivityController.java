@@ -2,16 +2,14 @@ package com.example.projectmanagement.resource;
 
 import com.example.projectmanagement.DTO.ActivityDto;
 import com.example.projectmanagement.Domaine.Activity;
-import com.example.projectmanagement.Domaine.Project;
 import com.example.projectmanagement.Service.ActivityImplServ;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -38,7 +36,11 @@ public class ActivityController {
         List<String> teamMembers = activityService.getAllTeamMembersByActivityId(activityId);
         return ResponseEntity.ok(teamMembers);
     }
-
+    @GetMapping("/countActivity")
+    public ResponseEntity<Long> countActivity() {
+        Long countActivity = activityService.countActivity();
+        return ResponseEntity.ok(countActivity);
+    }
     @PostMapping("/createActivity")
     public ResponseEntity<?> createActivity(@RequestBody ActivityDto activityDto) {
         try {
@@ -77,7 +79,26 @@ public class ActivityController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/activityCount/{status}")
+    public ResponseEntity<Long> countTasksByStatus(@PathVariable String status) {
+        Long count = activityService.countActivitiesByStatus(status);
+        return ResponseEntity.ok(count);
+    }
+    @GetMapping("/activityPercent/{state}")
+    public ResponseEntity<String> calculatePercentByState(@PathVariable String state) {
+        Long totalTasks = activityService.countActivity();
+        Long stateTasks = activityService.countActivitiesByStatus(state);
 
+        if (totalTasks == 0) {
+            return ResponseEntity.badRequest().body("No tasks found.");
+        }
 
+        double percent = (stateTasks.doubleValue() / totalTasks.doubleValue()) * 100.0;
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String formattedPercent = decimalFormat.format(percent) + "%";
+
+        return ResponseEntity.ok(formattedPercent);
+    }
 
 }

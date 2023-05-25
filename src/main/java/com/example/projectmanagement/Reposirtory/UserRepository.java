@@ -29,6 +29,12 @@ public interface UserRepository extends JpaRepository<User,Long> {
     List<User> findByRolesId(Long id);
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.RoleName = :roleName")
     List<User> findUsersByRoleName(@Param("roleName") String roleName);
+    @Query("SELECT COUNT(DISTINCT u) FROM User u JOIN u.tasks t")
+    Long countUsersWithTasks();
+
+
+
+
 
 
 }
