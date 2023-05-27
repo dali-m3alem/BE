@@ -18,7 +18,7 @@ public class ActivityController {
     private final ActivityImplServ activityService;
 
     @GetMapping("/getActivityByProjectId/{id}")
-    public List<Activity> getActivityByProjectId(@PathVariable Long id) {
+public List<Activity> getActivityByProjectId(@PathVariable Long id) {
         return activityService.getActivityByProjectId(id);
 
     }
@@ -43,7 +43,7 @@ public class ActivityController {
 
     @PutMapping("/activities/{id}")
     public ResponseEntity<Activity> updateActivity(@PathVariable(value = "id") Long id,
-                                                    @RequestBody ActivityDto activityDto) {
+                                                   @RequestBody ActivityDto activityDto) {
         if (activityDto.getId() == null || !activityDto.getId().equals(id)) {
             throw new IllegalArgumentException("Activity id does not match path variable");
         }
