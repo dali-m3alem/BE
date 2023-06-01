@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import java.util.Set;
         @JsonIgnore
         private List<Activity> activities = new ArrayList<>();
 
-        @ManyToMany(fetch = FetchType.EAGER)
+        @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
         @JoinTable(
                 name = "team_members",
                 joinColumns = @JoinColumn(name = "team_id"),

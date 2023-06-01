@@ -27,12 +27,12 @@ public class Activity implements Serializable {
     private String descriptionA;
     private String  objectiveA;
     private Date deadlineA ;
-
+    private String status;
     @ManyToOne
     private Project project;
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Task> task = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_id")

@@ -30,24 +30,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class userImpService implements UserSer{
-    @Autowired
     private final UserRepository repository;
-    @Autowired
     private final JwtService serviceJWT;
-    @Autowired
     private final TaskRepository taskRepository;
-    @Autowired
     private final TeamRepository teamRepository;
     @Autowired
     private AuthRepository repositoryAu;
-    @Autowired
     private TaskImplServ TaskImplServ;
     private final AuthenticationManager authenticationManager;
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    private final EntityManagerFactory entityManagerFactory;
+    private final PasswordEncoder passwordEncoder;
     private final ProjectRepository projectRepository;
 
 
@@ -70,13 +62,12 @@ public class userImpService implements UserSer{
         // TODO Auto-generated method stub
         return repository.save(user);
     }
-
     public ResponseAuth authenticate(RequestAuth request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
-                )
+                 )
         );
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
@@ -218,8 +209,16 @@ public class userImpService implements UserSer{
 
         return repository.save(user);
     }
+    @Transactional
     public void deleteUser(Long id) {
         User user = repository.findById(id).orElseThrow(EntityNotFoundException::new);
+
+        // Remove the user from any teams they belong to
+        List<Team> teams = teamRepository.findByMembersContaining(user);
+        for (Team team : teams) {
+            team.getMembers().remove(user);
+            teamRepository.save(team);
+        }
 
         // Remove the user from any tasks they are assigned to
         List<Task> userTasks = taskRepository.findByUser(user);
@@ -233,30 +232,26 @@ public class userImpService implements UserSer{
             task.setManager(null);
             taskRepository.save(task);
         }
+
         // Remove the admin from any project they are assigned to
-        List<Project> adminProject= projectRepository.findByAdmin(user);
-        for (Project project: adminProject){
+        List<Project> adminProject = projectRepository.findByAdmin(user);
+        for (Project project : adminProject) {
             project.setAdmin(null);
             projectRepository.save(project);
         }
+
         // Remove the manager from any project they are assigned to
-        List<Project> managerProject= projectRepository.findByProjectManager(user);
-        for (Project project: managerProject){
+        List<Project> managerProject = projectRepository.findByProjectManager(user);
+        for (Project project : managerProject) {
             project.setProjectManager(null);
             projectRepository.save(project);
         }
 
-        // Remove the user from any teams they belong to
-        List<Team> teams = teamRepository.findByMembersContaining(user);
-        for (Team team : teams) {
-            team.removeMember(user);
-            teamRepository.save(team);
-        }
-
-
         // Delete the user from the database
         repository.delete(user);
     }
+
+
 
     @Transactional
     public User getUserById(Long id) {
@@ -351,6 +346,40 @@ public class userImpService implements UserSer{
         Optional<User> userOptional = repository.findById(userId);
         return userOptional.orElse(null);
     }
+    public Long countTotalUsers() {
+        return repository.count();
+    }
+
+    public Long countUsersWithTasks() {
+        return repository.countUsersWithTasks();
+    }
+    public double calculateTaskPercentage() {
+        Long totalUsers = countTotalUsers();
+        Long usersWithTasks = countUsersWithTasks();
+
+        if (totalUsers == 0) {
+            return 0.0;
+        }
+
+        return (usersWithTasks.doubleValue() / totalUsers.doubleValue()) * 100.0;
+    }
+    public Long countUserWithNoTask(){
+        Long AllUsers = countTotalUsers();
+        Long UsersWithTask = countUsersWithTasks();
+        return AllUsers-UsersWithTask;
+    }
+    public double calculateNoTaskPercentage() {
+        Long totalUsers = countTotalUsers();
+        Long usersWithNoTasks = countUserWithNoTask();
+
+        if (totalUsers == 0) {
+            return 0.0;
+        }
+
+        return (usersWithNoTasks.doubleValue() / totalUsers.doubleValue()) * 100.0;
+    }
+
+
 }
 
 

@@ -11,6 +11,7 @@ public interface ActitvtyServ {
     public void deleteActivity(Long id);
     public Activity createActivity(ActivityDto activityDto);
     public Activity getActivityById(Long id);
-    public List<Activity> getActivityByProjectId(Long id,Long user);
+    public List<Activity> getActivityByProjectId(Long projectId, Long userId);
     public List<String> getAllTeamMembersByActivityId(Long activityId);
+    public List<Activity> getActivityByProjectId1(Long id);
 }

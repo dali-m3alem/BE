@@ -4,6 +4,9 @@ import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.*;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -26,11 +29,12 @@ public class ProjectImplServ implements ProjectServ{
     private final UserRepository userRepository;
     private final EntityManagerFactory entityManagerFactory;
     private final ActivityRepository activityRepository;
-    private final TaskRepository taskRepository;
+    private final TaskServ taskServ;
     private final TeamRepository teamRepository;
     private final NotificationRepository notificationRepository;
     private final WebSocketHandler webSocketHandler;
-
+    private final ActitvtyServ actitvtyServ;
+    private final TaskRepository taskRepository;
 
     public List<Project> getAllProjects() {
 
@@ -44,7 +48,8 @@ public class ProjectImplServ implements ProjectServ{
         User manager = userRepository.findById(managerId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
         List<Project> projects = projectRepository.findByProjectManager(manager);
-        return projects.stream().map(project -> {
+
+        for (Project project : projects) {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(project.getId());
             projectDto.setProjectName(project.getProjectName());
@@ -53,19 +58,64 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setAdmin(project.getAdmin().getEmail());
             projectDto.setDeadlineP(project.getDeadlineP());
             projectDto.setProjectManagerEmail(project.getProjectManager());
-            projectDto.setActivity((List<Activity>) project.getActivity());
-            projectDto.setStatus(project.getStatus());
+            projectDto.setBudget(project.getBudget());
+            projectDto.setActivity(project.getActivity());
+
+            if (project.getActivity().isEmpty()) {
+                projectDto.setStatus("not started");
+            } else {
+                boolean allActivitiesDone = true;
+
+                for (Activity activity : project.getActivity()) {
+                    if (!activity.getStatus().equalsIgnoreCase("done")) {
+                        allActivitiesDone = false;
+                        break;
+                    }
+                }
+
+                if (allActivitiesDone) {
+                    projectDto.setStatus("done");
+                } else {
+                    projectDto.setStatus("in progress");
+                }
+            }
+
+            if (project.getProjectManager() != null) {
+                projectDto.setProjectManagerEmail(project.getProjectManager());
+            } else {
+                projectDto.setProjectManagerEmail(null);
+            }
             projectDto.setBudget(project.getBudget());
 
-            return projectDto;
-        }).collect(Collectors.toList());
+            project.setStatus(projectDto.getStatus());
+            projectRepository.save(project);
+        }
+
+        return projects.stream()
+                .map(project -> {
+                    ProjectDto projectDto = new ProjectDto();
+                    projectDto.setId(project.getId());
+                    projectDto.setProjectName(project.getProjectName());
+                    projectDto.setDescriptionP(project.getDescriptionP());
+                    projectDto.setObjectiveP(project.getObjectiveP());
+                    projectDto.setAdmin(project.getAdmin().getEmail());
+                    projectDto.setDeadlineP(project.getDeadlineP());
+                    projectDto.setProjectManagerEmail(project.getProjectManager());
+                    projectDto.setBudget(project.getBudget());
+                    projectDto.setActivity(project.getActivity());
+                    projectDto.setStatus(project.getStatus());
+                    return projectDto;
+                })
+                .collect(Collectors.toList());
     }
+
     @Transactional
     public List<ProjectDto> getAllProjectsByAdminId(Long adminId) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
         List<Project> projects = projectRepository.findByAdmin(admin);
-        return projects.stream().map(project -> {
+
+        for (Project project : projects) {
             ProjectDto projectDto = new ProjectDto();
             projectDto.setId(project.getId());
             projectDto.setProjectName(project.getProjectName());
@@ -73,26 +123,62 @@ public class ProjectImplServ implements ProjectServ{
             projectDto.setObjectiveP(project.getObjectiveP());
             projectDto.setAdminId(project.getAdmin().getId());
             projectDto.setDeadlineP(project.getDeadlineP());
-            projectDto.setActivity( project.getActivity());
+            projectDto.setProjectManagerEmail(project.getProjectManager());
+            projectDto.setStatus(changeProjectStatus(project.getId()));
+            projectDto.setBudget(project.getBudget());
+
+            if (project.getActivity().isEmpty()) {
+                projectDto.setStatus("not started");
+            } else {
+                boolean allActivitiesDone = true;
+
+                for (Activity activity : project.getActivity()) {
+                    if (!activity.getStatus().equalsIgnoreCase("done")) {
+                        allActivitiesDone = false;
+                        break;
+                    }
+                }
+
+                if (allActivitiesDone) {
+                    projectDto.setStatus("done");
+                } else {
+                    projectDto.setStatus("in progress");
+                }
+            }
 
             if (project.getProjectManager() != null) {
                 projectDto.setProjectManagerEmail(project.getProjectManager());
             } else {
-                projectDto.setProjectManagerEmail(null); // or any other default value
+                projectDto.setProjectManagerEmail(null);
             }
-            projectDto.setStatus(project.getStatus());
+
             projectDto.setBudget(project.getBudget());
 
-            return projectDto;
-        }).collect(Collectors.toList());
+            project.setStatus(projectDto.getStatus());
+            projectRepository.save(project);
+        }
+
+        return projects.stream()
+                .map(project -> {
+                    ProjectDto projectDto = new ProjectDto();
+                    projectDto.setId(project.getId());
+                    projectDto.setProjectName(project.getProjectName());
+                    projectDto.setDescriptionP(project.getDescriptionP());
+                    projectDto.setObjectiveP(project.getObjectiveP());
+                    projectDto.setAdminId(project.getAdmin().getId());
+                    projectDto.setDeadlineP(project.getDeadlineP());
+                    projectDto.setProjectManagerEmail(project.getProjectManager());
+                    projectDto.setStatus(changeProjectStatus(project.getId()));
+                    projectDto.setBudget(project.getBudget());
+                    return projectDto;
+                })
+                .collect(Collectors.toList());
     }
 
+
+
     public Long countProjects() {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Query query = entityManager.createQuery("SELECT COUNT(p) FROM Project p");
-        Long count = (Long) query.getSingleResult();
-        entityManager.close();
-        return count;
+        return projectRepository.count();
     }
 
 
@@ -170,11 +256,22 @@ public class ProjectImplServ implements ProjectServ{
         project.setObjectiveP(projectRequest.getObjectiveP());
         project.setDescriptionP(projectRequest.getDescriptionP());
         project.setBudget(projectRequest.getBudget());
+        List<Activity> activities = activityRepository.findByProjectId(projectRequest.getId());
+
+        for (Activity activity : activities) {
+            List<Task> tasks = taskServ.getTaskByActivityId(activity.getId());
+
+            for (Task task : tasks) {
+                task.setManager(project.getProjectManager());
+            }
+
+            taskRepository.saveAll(tasks);}
+        String projectName = projectRequest.getProjectName();
         project= projectRepository.save(project);
 
         try {
             Notification notification = webSocketHandler
-                    .createNotification("Project has been updated", user);
+                    .createNotification("This project :" + projectName + " has been updated", user);
             webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
             // Handle the exception
@@ -193,10 +290,11 @@ public class ProjectImplServ implements ProjectServ{
 
         // Get the project manager's information
         User projectManager = project.getProjectManager();
+        String projectName = project.getProjectName();
         // Send a notification to the project manager
         try {
             Notification notification = webSocketHandler
-                    .createNotification("Project has been deleted", projectManager);
+                    .createNotification("This project :" +projectName+" has been deleted", projectManager);
             webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
             // Handle the exception
@@ -205,16 +303,44 @@ public class ProjectImplServ implements ProjectServ{
         // Delete the project
         projectRepository.deleteById(id);
 
-
     }
+    public String changeProjectStatus(Long id) {
+        Project project = getProjectById(id);
+        List<Activity> activities = actitvtyServ.getActivityByProjectId1(id);
+        boolean allActivitiesDone = true;
 
+        if (activities.isEmpty()) {
+            project.setStatus("not started");
+        } else {
+            for (Activity activity : activities) {
+                if (!activity.getStatus().equals("done")) {
+                    allActivitiesDone = false;
+                    break;
+                }
+            }
+            if (allActivitiesDone) {
+                project.setStatus("done");
+            } else {
+                project.setStatus("in progress");
+            }
+        }
 
+        projectRepository.save(project);
+        return project.getStatus();
+    }
+    public Long countProjectsByStatus(String status) {
+        Query query = createCountQueryByStatus(status);
+        Long count = (Long) query.getSingleResult();
+        return count;
+    }
+    private Query createCountQueryByStatus(String status) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Project> root = query.from(Project.class);
 
+        query.select(cb.count(root));
+        query.where(cb.equal(root.get("status"), status));
+
+        return entityManager.createQuery(query);
+    }
 }
-
-
-
-
-
-
-

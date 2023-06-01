@@ -6,16 +6,19 @@ import com.example.projectmanagement.Domaine.User;
 import com.example.projectmanagement.Service.userImpService;
 import com.example.projectmanagement.config.JwtService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 
 
@@ -28,6 +31,8 @@ public class Usercontroller {
 
     @Autowired
     private userImpService service;
+    @Autowired
+    private final JwtService jwtService;
     private final JwtService serviceJWT;
 
 
@@ -36,7 +41,8 @@ public class Usercontroller {
     public List<User> getTeamMembers(@PathVariable Long teamId) {
         return service.findMembersByTeamId(teamId);
     }*/
-    @PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+@PreAuthorize("hasAuthority('admin')")
+@PostMapping(value = "/register", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<ResponseAuth> registerUser(@Valid @ModelAttribute RequestRegister request) throws IOException {
         try {
             ResponseAuth response = service.registerUser(request);
@@ -61,7 +67,6 @@ public class Usercontroller {
     ) {
         return ResponseEntity.ok(service.authenticate(request));
     }
-
 
     @GetMapping("/getAllUsers")
     public List<User> getAllUsers() {
@@ -130,12 +135,19 @@ public class Usercontroller {
 
 
 
-
+    @PreAuthorize("hasAuthority('admin')")
     @DeleteMapping("/deleteUser")
     public ResponseEntity<?> deleteUser(@RequestParam Long id) {
-        service.deleteUser(id);
-        return ResponseEntity.ok().build();
+        try {
+            service.deleteUser(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
 
 
 
@@ -147,7 +159,11 @@ public class Usercontroller {
         return service.getUserWSUN(str);
     }
     @GetMapping("/getuserId")
-    public ResponseEntity<User> getUserById(@RequestParam Long id) {
+    public ResponseEntity<User> getUserById(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        String jwt = authHeader.substring(7);
+        System.out.println(jwt);
+        Long id = Long.valueOf(jwtService.extractId(jwt));
         User user = service.getUserById(id);
         return ResponseEntity.ok(user);
     }
@@ -183,6 +199,35 @@ public class Usercontroller {
     public List<String> getUsersWithManagerUserRole() {
         return service.getUsersWithManagerUserRole();
 
+    }
+    @GetMapping("/percentUsersWithTasks")
+    public ResponseEntity<String> calculateTaskPercentage() {
+        double taskPercentage = service.calculateTaskPercentage();
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String formattedTaskPercentage = decimalFormat.format(taskPercentage) + "%";
+
+        return ResponseEntity.ok(formattedTaskPercentage);
+    }
+    @GetMapping("/countUsersWithTasks")
+    public ResponseEntity<Long> countUsersWithTasks() {
+        Long count = service.countUsersWithTasks();
+        return ResponseEntity.ok(count);
+
+    }
+    @GetMapping("/countUsersWithNoTasks")
+    public ResponseEntity<Long> countUsersWithNoTasks() {
+        Long usersWithNoTasks = service.countUserWithNoTask();
+        return ResponseEntity.ok(usersWithNoTasks);
+    }
+    @GetMapping("/percentUsersWithNoTasks")
+    public ResponseEntity<String> calculateNoTaskPercentage() {
+        double taskPercentage = service.calculateNoTaskPercentage();
+
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        String formattedTaskPercentage = decimalFormat.format(taskPercentage) + "%";
+
+        return ResponseEntity.ok(formattedTaskPercentage);
     }
 }
 

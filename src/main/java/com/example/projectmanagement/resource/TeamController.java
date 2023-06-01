@@ -9,10 +9,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -43,14 +45,15 @@ public class TeamController {
         }
     }
     @GetMapping("/ids")
-    public List<String> getAllTeamIds() {
+    public Set<String> getAllTeamIds() {
         return teamService.getAllTeamIds();
     }
+
     @GetMapping(value = "/getAllTeam")
     public List<Team> getAllTeam() {
         return teamService.getAllTeam();
     }
-
+    @PreAuthorize("hasAuthority('manager')")
     @PostMapping(value = "/addTeam")
     public ResponseEntity<Team> addTeam(@RequestBody TeamDTO teamRequest) {
         try {
@@ -61,7 +64,7 @@ public class TeamController {
         }
     }
 
-
+    @PreAuthorize("hasAuthority('manager')")
     @PutMapping(value = "/updateTeam/{idTeam}")
     public ResponseEntity<Team> updateTeam(@RequestBody  TeamDTO teamRequest) {
         try {
@@ -72,7 +75,7 @@ public class TeamController {
             return ResponseEntity.status(ex.getStatusCode()).body(null);
         }
     }
-
+    @PreAuthorize("hasAuthority('manager')")
     @DeleteMapping(value = "/deleteTeam/{idTeam}")
     public void deleteTeam(@PathVariable("idTeam") Long idTeam)
     {

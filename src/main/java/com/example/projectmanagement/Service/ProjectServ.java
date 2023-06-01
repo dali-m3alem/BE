@@ -8,6 +8,7 @@ import com.example.projectmanagement.Domaine.Project;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProjectServ {
     public List<Project> getAllProjects();
@@ -16,4 +17,6 @@ public interface ProjectServ {
     public Project updateProject(ProjectRequest projectRequest);
     public void deleteProject(Long id);
     public Project createProject(ProjectRequest projectRequest) throws AccessDeniedException;
-    public List<ProjectDto> getAllProjectsByManagerId(Long managerId);}
+    public List<ProjectDto> getAllProjectsByManagerId(Long managerId);
+    public Optional<Long> getTotalBudget();
+}

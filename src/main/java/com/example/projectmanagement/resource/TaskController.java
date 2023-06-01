@@ -12,9 +12,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -25,12 +29,13 @@ public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
     @Autowired
-    private  JwtService jwtService;
+    private JwtService jwtService;
 
     @GetMapping("/countTask")
     public int countTasksNotDone() {
         return taskservice.countTasksNotDone();
     }
+
     @GetMapping("/getTasksByActivityAndProjectAndManager/{activityId}/{projectId}")
     public ResponseEntity<?> getTasksByActivityAndProjectAndManager(@PathVariable Long activityId, @PathVariable Long projectId, HttpServletRequest request) {
         try {
@@ -38,7 +43,7 @@ public class TaskController {
             String jwt = authHeader.substring(7);
             System.out.println(jwt);
             Long managerId = Long.valueOf(jwtService.extractId(jwt));
-            return ResponseEntity.status(HttpStatus.OK).body(taskservice.getTasksByActivityAndProjectAndManager(activityId, projectId,managerId));
+            return ResponseEntity.status(HttpStatus.OK).body(taskservice.getTasksByActivityAndProjectAndManager(activityId, projectId, managerId));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
@@ -46,14 +51,25 @@ public class TaskController {
 
 
     @GetMapping("/getTasks")
-    public List<Task> getTasksByUserId2(@RequestParam Long userId) {
+    public List<Task> getTasksByUserId2(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        String jwt = authHeader.substring(7);
+        System.out.println(jwt);
+        Long userId = Long.valueOf(jwtService.extractId(jwt));
+
         return taskservice.getTasksByUserId(userId);
     }
+
     @GetMapping("/getTasksManager")
-    public List<Task> getTasksByManagerId2(@RequestParam Long managerId) {
+    public List<Task> getTasksByManagerId2(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        String jwt = authHeader.substring(7);
+        System.out.println(jwt);
+        Long managerId = Long.valueOf(jwtService.extractId(jwt));
+
         return taskservice.getTasksByManagerId(managerId);
     }
-
+    @PreAuthorize("hasAuthority('manager')")
     @PostMapping("/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDto taskDto, HttpServletRequest request) {
         try {
@@ -74,26 +90,25 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
-
+    @PreAuthorize("hasAuthority('manager') || hasAuthority('user')")
     @PutMapping("/update")
     public ResponseEntity<Task> updateTask(@RequestBody Task task) {
         Task updatedTask = taskservice.updateTask1(task);
         return new ResponseEntity<>(updatedTask, HttpStatus.OK);
     }
-
+    @PreAuthorize("hasAuthority('manager') || hasAuthority('user')")
     @PutMapping("/update/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody TaskDto taskDto) {
         Task updatedTask = taskservice.updateTask(taskDto, id);
         return ResponseEntity.ok(updatedTask);
     }
 
-
+    @PreAuthorize("hasAuthority('manager')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
         taskservice.deleteTask(id);
         return ResponseEntity.noContent().build();
     }
-
 
 
     @GetMapping("/getAllTasks")
@@ -102,17 +117,39 @@ public class TaskController {
     }
 
 
-     @GetMapping( "/getAllTasks/{str}")
-     public List<Task> getAllTasksOfAuthenticatedUser(@PathVariable("str") String str) {
-         return taskservice.getAllTasksOfUser(str);
-     }
+    @GetMapping("/getAllTasks/{str}")
+    public List<Task> getAllTasksOfAuthenticatedUser(@PathVariable("str") String str) {
+        return taskservice.getAllTasksOfUser(str);
+    }
+
     @GetMapping("/tasks")
     public List<Task> getTasksByUser(@RequestParam(name = "user_id") Long userId) {
         return taskRepository.findByUserId(userId);
     }
 
+    @GetMapping("/countTasks")
+    public ResponseEntity<Long> countTask() {
+        Long countTask = taskservice.countTask();
+        return ResponseEntity.ok(countTask);
+    }
 
+    @GetMapping("/taskCount/{status}")
+    public ResponseEntity<Long> countTasksByStatus(@PathVariable String status) {
+        Long count = taskservice.countTasksByStatus(status);
+        return ResponseEntity.ok(count);
+    }
 
+    @GetMapping("/TaskPercent/{state}")
+    public ResponseEntity<Integer> calculatePercentByState(@PathVariable String state) {
+        Long totalTasks = taskservice.countTask();
+        Long stateTasks = taskservice.countTasksByStatus(state);
 
-    
+        if (totalTasks == 0) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        int percent = (int) Math.round((stateTasks.doubleValue() / totalTasks.doubleValue()) * 100.0);
+
+        return ResponseEntity.ok(percent);
+    }
 }

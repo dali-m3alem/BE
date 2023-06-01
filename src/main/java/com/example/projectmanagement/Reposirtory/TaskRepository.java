@@ -22,6 +22,7 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
     List<Task> findByUserWithFetch(@Param("user") User user);
     List<Task> findByUserId(Long userId);
 
+
     @Query("SELECT t FROM Task t WHERE t.activity.id = ?1 AND t.activity.project.id = ?2 AND t.activity.project.projectManager.id = ?3")
     List<Task> getTasksByActivityAndProjectAndManager(Long activityId, Long projectId, Long projectManagerId);
 

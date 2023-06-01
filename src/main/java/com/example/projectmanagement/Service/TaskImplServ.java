@@ -1,18 +1,16 @@
 package com.example.projectmanagement.Service;
 
-import com.example.projectmanagement.DTO.ActivityDto;
-import com.example.projectmanagement.DTO.TaskDto;
-import com.example.projectmanagement.DTO.UserDto;
+import com.example.projectmanagement.DTO.*;
 import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.ActivityRepository;
 import com.example.projectmanagement.Reposirtory.NotificationRepository;
 import com.example.projectmanagement.Reposirtory.TaskRepository;
 import com.example.projectmanagement.Reposirtory.UserRepository;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +40,22 @@ public class TaskImplServ implements TaskServ{
     }
 
 
-    public List<Task> getTasksByActivityAndProjectAndManager(Long activityId, Long projectId, Long projectManagerId) throws Exception {
+    public List<taskDTOSimple> getTasksByActivityAndProjectAndManager(Long activityId, Long projectId, Long projectManagerId) throws Exception {
         List<Task> tasks = taskRepository.getTasksByActivityAndProjectAndManager(activityId, projectId, projectManagerId);
-        if (tasks == null) {
-            throw new Exception("No tasks found");
-        }
-        return tasks;
+
+
+        return tasks.stream().map(task -> {
+            taskDTOSimple taskDTOSimple = new taskDTOSimple();
+            taskDTOSimple.setId(task.getId());
+            taskDTOSimple.setStatus(task.getStatus());
+            taskDTOSimple.setTitle(task.getTitle());
+            taskDTOSimple.setDescription(task.getDescription());
+            taskDTOSimple.setUser(task.getUser());
+            taskDTOSimple.setDueDate(task.getDueDate());
+            taskDTOSimple.setActivity(task.getActivity());
+
+            return taskDTOSimple;
+        }).collect(Collectors.toList());
     }
 
 
@@ -60,6 +69,12 @@ public class TaskImplServ implements TaskServ{
         String query = "SELECT t FROM Task t LEFT JOIN FETCH t.activity LEFT JOIN FETCH t.manager u WHERE u.id = :managerId\n";
         TypedQuery<Task> typedQuery = entityManager.createQuery(query, Task.class);
         typedQuery.setParameter("managerId", managerId);
+        return typedQuery.getResultList();
+    }
+    public List<Task> getTaskByActivityId(Long activityId){
+        String query = "SELECT t FROM Task t LEFT JOIN FETCH t.activity LEFT JOIN FETCH t.activity a WHERE a.id=:activityId\n";
+        TypedQuery<Task> typedQuery=entityManager.createQuery(query,Task.class);
+        typedQuery.setParameter("activityId",activityId);
         return typedQuery.getResultList();
     }
 
@@ -89,7 +104,7 @@ public class TaskImplServ implements TaskServ{
         task = taskRepository.save(task);
         String nameTask=taskDto.getTitle();
         try {
-            Notification notification = webSocketHandler.createNotification("A new task"+nameTask+" has been created to you", user);
+            Notification notification = webSocketHandler.createNotification("A new task :"+nameTask+" has been created to you", user);
             webSocketHandler.sendNotification(notification);
 
         } catch (IOException e) {
@@ -106,7 +121,7 @@ public class TaskImplServ implements TaskServ{
             updatedTask.setDescription(taskDto.getDescription());
             updatedTask.setTitle(taskDto.getTitle());
             updatedTask.setDueDate(taskDto.getDueDate());
-
+            updatedTask.setStatus(taskDto.getStatus());
             String email = taskDto.getEmail();
             User user = Repository.findByEmail(email)
                     .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
@@ -117,9 +132,10 @@ public class TaskImplServ implements TaskServ{
             updatedTask.setActivity(activity);
 
             updatedTask= taskRepository.save(updatedTask);
+            String nameTask=taskDto.getTitle();
 
             try {
-                Notification notification = webSocketHandler.createNotification("A task has been updated to you", user);
+                Notification notification = webSocketHandler.createNotification("This task :"+nameTask+"  has been updated to you", user);
                 webSocketHandler.sendNotification(notification);
 
             } catch (IOException e) {
@@ -146,27 +162,25 @@ public class TaskImplServ implements TaskServ{
                 .orElseThrow(() -> new EntityNotFoundException("task not found with id: " + id));
         User user = task.getUser();
         taskRepository.deleteById(id);
+        String nameTask=task.getTitle();
 
         try {
-            Notification notification = webSocketHandler.createNotification("Task has been deleted", user);
+            Notification notification = webSocketHandler.createNotification("This task :"+nameTask+"  has been updated to you", user);
             webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
         }
     }
 
-
-
     public Task updateTask1(Task task) {
         Optional<Task> optionalTask = taskRepository.findById(task.getId());
         if (optionalTask.isPresent()) {
             Task updatedTask = optionalTask.get();
-            updatedTask.setStatus(task.getStatus());
-            return taskRepository.save(updatedTask);
+        updatedTask.setStatus(updatedTask.getStatus());
+        return taskRepository.save(updatedTask);
         } else {
             throw new NotFoundException("Task not found with id: " + task.getId());
         }
     }
-
 
     public List<Task> getAllTasks() {
         return (List<Task>) taskRepository.findAll();
@@ -176,31 +190,25 @@ public class TaskImplServ implements TaskServ{
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return user.getTasks();
     }
+    public Long countTask() {
+        return taskRepository.count();
+    }
+    public Long countTasksByStatus(String status) {
+        Query query = createCountQueryByStatus(status);
+        Long count = (Long) query.getSingleResult();
+        return count;
+    }
 
-   // public List<Task> getTasksByUserId(Long userId) {
-    //    User user = new User();
-    //    user.setId(userId);
-    //    return taskRepository.findByUser(user);
-    //}
+    private Query createCountQueryByStatus(String status) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Task> root = query.from(Task.class);
 
+        query.select(cb.count(root));
+        query.where(cb.equal(root.get("status"), status));
 
-
- /*   @Transactional()
-    public List<Task> getAllTasksWithUserAndActivity() {
-        List<Task> tasks = taskRepository.findAll();
-        for (Task task : tasks) {
-            User user = task.getUser();
-            if (user != null) {
-                user.getTasks().size(); // Load tasks for user
-            }
-            Activity activity = task.getActivity();
-            if (activity != null) {
-                activity.getTasks().size(); // Load tasks for activity
-            }
-        }
-        return tasks;
-    }*/
-
+        return entityManager.createQuery(query);
+    }
 
 
 }

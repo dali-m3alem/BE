@@ -1,7 +1,6 @@
 package com.example.projectmanagement.Domaine;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,14 +28,15 @@ public class Task  implements Serializable{
     private String description;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @OnDelete(action = OnDeleteAction.NO_ACTION)
-    @JsonBackReference
+    @JsonIgnoreProperties("tasks")
     private User user;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id", referencedColumnName = "id")
-    @OnDelete(action = OnDeleteAction.NO_ACTION)
-    @JsonBackReference
+    @JsonIgnoreProperties("tasks")
     private User manager;
+
+
     private String status;
 
     @ManyToOne(fetch = FetchType.EAGER)
