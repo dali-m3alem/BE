@@ -15,7 +15,8 @@ import java.util.Optional;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findById(Long idTeam);
-    List<Team> findByMembersContaining(User user);
+    @Query("SELECT t FROM Team t JOIN t.members m WHERE m.id = :userId")
+    List<Team> findTeamsByUserId(@Param("userId") Long userId);
     Optional<Team>findByTeamName(String team);
     @Query("SELECT a.team FROM Activity a WHERE a.id = :activityId AND a.project.id = :projectId AND a.project.projectManager.id = :managerId")
     Team getTeamByActivityAndProjectAndManager(@Param("activityId") Long activityId, @Param("projectId") Long projectId, @Param("managerId") Long managerId);

@@ -234,7 +234,10 @@ public class ProjectImplServ implements ProjectServ{
         }
         return project;
     }
-    public Project updateProject( ProjectRequest projectRequest) {
+
+
+
+    public ProjectRequest updateProject(ProjectRequest projectRequest) {
         String email = projectRequest.getEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
@@ -242,13 +245,15 @@ public class ProjectImplServ implements ProjectServ{
         if (!user.hasProjectManagerRole()) {
             throw new AccessDeniedException("User does not have project manager role");
         }
-        Long userId=projectRequest.getUserId();
-        User user1=userRepository.findById(userId) .
-                orElseThrow(()
-                        -> new EntityNotFoundException("User not found : " + userId));
+
+        Long userId = projectRequest.getUserId();
+        User user1 = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found : " + userId));
+
         Project project = projectRepository
                 .findById(projectRequest.getId())
                 .orElseThrow(EntityNotFoundException::new);
+
         project.setProjectName(projectRequest.getProjectName());
         project.setProjectManager(user);
         project.setAdmin(user1);
@@ -256,6 +261,7 @@ public class ProjectImplServ implements ProjectServ{
         project.setObjectiveP(projectRequest.getObjectiveP());
         project.setDescriptionP(projectRequest.getDescriptionP());
         project.setBudget(projectRequest.getBudget());
+
         List<Activity> activities = activityRepository.findByProjectId(projectRequest.getId());
 
         for (Activity activity : activities) {
@@ -265,20 +271,23 @@ public class ProjectImplServ implements ProjectServ{
                 task.setManager(project.getProjectManager());
             }
 
-            taskRepository.saveAll(tasks);}
+            taskRepository.saveAll(tasks);
+        }
+
         String projectName = projectRequest.getProjectName();
-        project= projectRepository.save(project);
+        project = projectRepository.save(project);
 
         try {
             Notification notification = webSocketHandler
-                    .createNotification("This project :" + projectName + " has been updated", user);
+                    .createNotification("This project: " + projectName + " has been updated", user);
             webSocketHandler.sendNotification(notification);
         } catch (IOException e) {
-            // Handle the exception
+            // Gérer l'exception
         }
 
-        return project;
+        return projectRequest;
     }
+
 
 
     public void deleteProject(Long id) {

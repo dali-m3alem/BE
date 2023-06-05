@@ -16,7 +16,7 @@ public class ProjectDTOs  {
     private String projectName;
     private String descriptionP;
     private String objectiveP ;
-    private String durationP;
+
     private Date deadlineP ;
     private String projectManagerEmail;
 

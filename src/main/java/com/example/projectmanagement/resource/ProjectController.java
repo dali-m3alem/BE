@@ -2,21 +2,16 @@ package com.example.projectmanagement.resource;
 
 import com.example.projectmanagement.DTO.*;
 import com.example.projectmanagement.Domaine.Project;
-import com.example.projectmanagement.Domaine.User;
 import com.example.projectmanagement.Service.ProjectImplServ;
 import com.example.projectmanagement.config.JwtService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,14 +65,9 @@ public class ProjectController {
 
     @PreAuthorize("hasAuthority('admin')")
     @PutMapping("/updateProject")
-    public ResponseEntity<?> updateProject(@RequestBody ProjectRequest projectRequest) {
-        try {  Project project = projectService.updateProject(projectRequest);
-            return ResponseEntity.ok(project);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.badRequest().body("User not found");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<ProjectRequest> updateProject(@RequestBody ProjectRequest projectRequest) {
+        ProjectRequest updatedProjectRequest = projectService.updateProject(projectRequest);
+        return ResponseEntity.ok(updatedProjectRequest);
     }
     @PreAuthorize("hasAuthority('admin')")
     @DeleteMapping("/deleteProject")
@@ -101,7 +91,7 @@ public class ProjectController {
     }
     @GetMapping("/projectPercent/{state}")
     public ResponseEntity<Integer> calculatePercentByState(@PathVariable String state) {
-        Long totalProjects = projectService.countProjectsByStatus("not started");
+        Long totalProjects = projectService.countProjects();
         Long stateProjects = projectService.countProjectsByStatus(state);
 
         if (totalProjects == 0) {

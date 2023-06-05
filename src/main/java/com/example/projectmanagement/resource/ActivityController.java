@@ -85,7 +85,7 @@ public class ActivityController {
     }
     @GetMapping("/activityPercent/{state}")
     public ResponseEntity<Integer> calculatePercentByState(@PathVariable String state) {
-        Long totalTasks = activityService.countActivitiesByStatus("not started");
+        Long totalTasks = activityService.countactvi();
         Long stateTasks = activityService.countActivitiesByStatus(state);
 
         if (totalTasks == 0) {

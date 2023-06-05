@@ -74,6 +74,23 @@ public class User implements Serializable,UserDetails{
     protected void onCreate() {
         dateDeCreation = LocalDateTime.now();
     }
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        User otherUser = (User) object;
+        return id != null && id.equals(otherUser.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 
     @Override
     public Collection<GrantedAuthority> getAuthorities() {

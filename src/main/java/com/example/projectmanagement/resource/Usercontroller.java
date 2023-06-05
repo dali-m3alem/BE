@@ -115,9 +115,9 @@ public class Usercontroller {
     }
 
     @PutMapping("/updateUserWP")
-    public ResponseEntity<?> updateUserwp(@RequestBody User updatedUser) {
+    public ResponseEntity<?> updateUserwp(@RequestBody UpdateUser updatedUser) {
         try {
-            User user = service.updateUserWP(updatedUser);
+            UpdateUser user = service.updateUserWP(updatedUser);
             return ResponseEntity.ok(user);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().body("User not found");

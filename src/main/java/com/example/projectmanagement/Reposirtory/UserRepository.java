@@ -35,4 +35,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("SELECT COUNT(DISTINCT u) FROM User u JOIN u.tasks t")
     Long countUsersWithTasks();
 
+
 }

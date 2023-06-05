@@ -16,7 +16,6 @@ public interface UserSer {
     public void createUserAndTask(User user, Task task);
     public User addUser(User user);
 
-    User updateUserWP(User updatedUser);
 
     public User updateUser(User updatedUser);
     public void deleteUser(Long id);

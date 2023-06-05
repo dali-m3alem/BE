@@ -1,8 +1,6 @@
 package com.example.projectmanagement.Service;
 
-import com.example.projectmanagement.DTO.RequestAuth;
-import com.example.projectmanagement.DTO.RequestRegister;
-import com.example.projectmanagement.DTO.ResponseAuth;
+import com.example.projectmanagement.DTO.*;
 import com.example.projectmanagement.Domaine.*;
 import com.example.projectmanagement.Reposirtory.*;
 import com.example.projectmanagement.config.JwtService;
@@ -41,7 +39,7 @@ public class userImpService implements UserSer{
     private final EntityManagerFactory entityManagerFactory;
     private final PasswordEncoder passwordEncoder;
     private final ProjectRepository projectRepository;
-
+    private final JwtService jwtService;
 
 
     public Long countUsers() {
@@ -156,8 +154,7 @@ public class userImpService implements UserSer{
         task.setUser(savedUser);
         taskRepository.save(task);
     }
-    @Override
-    public User updateUserWP(User updatedUser) {
+    public UpdateUser updateUserWP(UpdateUser updatedUser) {
         User user = repository.findById(updatedUser.getId())
                 .orElseThrow(EntityNotFoundException::new);
         if (!updatedUser.getEmail().equals(user.getEmail())
@@ -170,8 +167,16 @@ public class userImpService implements UserSer{
         user.setEmail(updatedUser.getEmail());
         user.setPhoneNumber(updatedUser.getPhoneNumber());
         user.setTitre(updatedUser.getTitre());
-        return repository.save(user);
+        String newToken = jwtService.generateToken(user);
+
+        repository.save(user);
+
+        // Mettre à jour le token dans l'objet UpdateUser
+        updatedUser.setToken(newToken);
+
+        return updatedUser;
     }
+
 
     @Override
     public void  changePassword(Long id, String oldPassword, String newPassword) {
@@ -213,13 +218,6 @@ public class userImpService implements UserSer{
     public void deleteUser(Long id) {
         User user = repository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        // Remove the user from any teams they belong to
-        List<Team> teams = teamRepository.findByMembersContaining(user);
-        for (Team team : teams) {
-            team.getMembers().remove(user);
-            teamRepository.save(team);
-        }
-
         // Remove the user from any tasks they are assigned to
         List<Task> userTasks = taskRepository.findByUser(user);
         for (Task task : userTasks) {
@@ -237,6 +235,7 @@ public class userImpService implements UserSer{
         List<Project> adminProject = projectRepository.findByAdmin(user);
         for (Project project : adminProject) {
             project.setAdmin(null);
+            project.setProjectManager(null);
             projectRepository.save(project);
         }
 
@@ -246,10 +245,15 @@ public class userImpService implements UserSer{
             project.setProjectManager(null);
             projectRepository.save(project);
         }
+        List<Team> teams = teamRepository.findTeamsByUserId(id);
+        for (Team team : teams) {
+            team.removeMember(user);
+            teamRepository.save(team);
+        }
 
-        // Delete the user from the database
         repository.delete(user);
     }
+
 
 
 
@@ -310,24 +314,30 @@ public class userImpService implements UserSer{
 
     public List<String> getUsersWithManagerRole() {
         List<User> usersWithManagerUserRole = repository.findUsersByRoleName("manager");
-        List<String> emails = new ArrayList<>();
+        Set<String> userDTOs = new HashSet<>();
+
         for (User user : usersWithManagerUserRole) {
-            emails.add(user.getEmail());
+            userDTOs.add(user.getEmail());
         }
-        return emails;
+
+        return new ArrayList<>(userDTOs);
     }
+
     public List<String> getUsersWithManagerUserRole() {
         List<User> usersWithManagerUserRole = repository.findUsersByRoleName("manager");
         List<User> usersWithManagerUserRole1 = repository.findUsersByRoleName("user");
 
-        List<String> emails = new ArrayList<>();
+        Set<String> uniqueEmails = new HashSet<>();
+
         for (User user : usersWithManagerUserRole) {
-            emails.add(user.getEmail());
+            uniqueEmails.add(user.getEmail());
         }
+
         for (User user : usersWithManagerUserRole1) {
-            emails.add(user.getEmail());
+            uniqueEmails.add(user.getEmail());
         }
-        return emails;
+
+        return new ArrayList<>(uniqueEmails);
     }
    /* public List<User> findMembersByTeamId(Long userId) {
             Optional<User> Team = repository.findById(userId);
